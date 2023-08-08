@@ -1,0 +1,34 @@
+{{ template "base" .}}
+{{ define "title"}}
+Home
+{{end}}
+{{define "content"}}
+
+<div class="grid text-center" style="margin:10% auto;">
+  <h2 class="mb-5">{{index .StringMap "subheading"}}</h2>
+
+  <form action="/signin" method="post" class="needs-validation" novalidate>
+    <div class="input-group flex-nowrap mb-5">
+      <span class="input-group-text" id="addon-wrapping">
+        <i class="bi bi-envelope-at"></i>
+      </span>
+      <input type="text" class="w3-input" name="email" placeholder="Email" aria-label="Username"
+        aria-describedby="addon-wrapping" required>
+    </div>
+
+    <div class="input-group flex-nowrap">
+      <span class="input-group-text" id="addon-wrapping">
+        <i class="bi bi-lock"></i>
+      </span>
+      <input type="password" class="w3-input" name="password" placeholder="Password" aria-label="Username"
+        aria-describedby="addon-wrapping" required>
+    </div>
+
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+    <div class="input-group flex-nowrap w3-margin-top">
+      <input class="w3-btn w3-blue w3-ripple w3-round-large" type="submit" value="Sign In">
+    </div>
+  </form>
+</div>
+{{ end }}

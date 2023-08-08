@@ -1,0 +1,15 @@
+{{template "base" .}}
+{{ define "title"}}
+  Dashboard
+{{end}}
+
+{{define "content"}}
+  <div class="container-fluid text-center" style="-margin:10% auto;">
+    <h2>{{index .StringMap "subheading"}}</h2>
+
+    <div class="grid">
+      <div class="g-start-2" style="grid-row: 2">{{index .StringMap "body"}}</div>
+      <div class="g-start-3" style="grid-row: 3">{{index .StringMap "footer"}}</div>
+    </div>
+  </div>
+{{end}}

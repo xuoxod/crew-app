@@ -1,0 +1,23 @@
+mode: set
+github.com/xuoxod/crew-app/internal/render/render.go:20.40,22.2 1 1
+github.com/xuoxod/crew-app/internal/render/render.go:24.84,30.2 5 1
+github.com/xuoxod/crew-app/internal/render/render.go:32.105,35.18 2 1
+github.com/xuoxod/crew-app/internal/render/render.go:35.18,37.3 1 0
+github.com/xuoxod/crew-app/internal/render/render.go:37.8,39.3 1 1
+github.com/xuoxod/crew-app/internal/render/render.go:41.2,43.9 2 1
+github.com/xuoxod/crew-app/internal/render/render.go:43.9,46.3 2 1
+github.com/xuoxod/crew-app/internal/render/render.go:48.2,56.16 5 1
+github.com/xuoxod/crew-app/internal/render/render.go:56.16,59.3 2 0
+github.com/xuoxod/crew-app/internal/render/render.go:61.2,61.12 1 1
+github.com/xuoxod/crew-app/internal/render/render.go:64.67,69.16 3 1
+github.com/xuoxod/crew-app/internal/render/render.go:69.16,71.3 1 0
+github.com/xuoxod/crew-app/internal/render/render.go:73.2,73.29 1 1
+github.com/xuoxod/crew-app/internal/render/render.go:73.29,80.17 3 1
+github.com/xuoxod/crew-app/internal/render/render.go:80.17,83.4 2 0
+github.com/xuoxod/crew-app/internal/render/render.go:86.3,88.17 2 1
+github.com/xuoxod/crew-app/internal/render/render.go:88.17,91.4 2 0
+github.com/xuoxod/crew-app/internal/render/render.go:93.3,93.23 1 1
+github.com/xuoxod/crew-app/internal/render/render.go:93.23,97.18 2 1
+github.com/xuoxod/crew-app/internal/render/render.go:97.18,99.5 1 0
+github.com/xuoxod/crew-app/internal/render/render.go:102.3,102.21 1 1
+github.com/xuoxod/crew-app/internal/render/render.go:105.2,105.21 1 1

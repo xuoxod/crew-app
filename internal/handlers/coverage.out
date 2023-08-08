@@ -1,0 +1,23 @@
+mode: set
+github.com/xuoxod/crew-app/internal/handlers/landing.go:24.47,28.2 1 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:31.33,33.2 1 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:38.71,43.2 3 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:48.72,53.2 3 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:58.75,69.2 4 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:74.79,77.16 2 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:77.16,80.3 2 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:82.2,101.19 7 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:101.19,111.3 4 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:113.2,115.66 2 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:121.73,124.16 2 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:124.16,127.3 2 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:129.2,138.19 5 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:138.19,144.3 4 1
+github.com/xuoxod/crew-app/internal/handlers/landing.go:146.2,146.56 1 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:154.75,162.16 3 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:162.16,164.3 1 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:166.2,167.14 2 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:173.82,177.9 2 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:177.9,183.3 5 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:185.2,189.96 4 0
+github.com/xuoxod/crew-app/internal/handlers/landing.go:195.72,202.2 5 1

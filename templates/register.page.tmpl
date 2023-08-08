@@ -1,0 +1,107 @@
+{{ template "base" .}}
+{{ define "title"}}
+Register
+{{end}}
+
+{{define "content"}}
+<div class="grid text-center" style="margin:10% auto;">
+    <div class="row mb-2">
+        <h1>
+            Registration
+        </h1>
+    </div>
+
+{{$reg := index .Data "registration"}}
+    <form action="/register" method="post" class="needs-validation" novalidate>
+
+        <div class="mb-3">
+            <label for="fname" class="form-label w3-left">
+                <strong>
+                    First Name
+                    {{with .Form.Errors.Get "fname"}}
+                    <label for="" class="text-danger">{{.}}</label>
+                    {{end}}
+                </strong>
+            </label>
+
+            <input type="text" class="form-control {{with .Form.Errors.Get "fname"}} is-invalid {{end}}" name="fname"
+                placeholder="Enter first name" autocomplete="off" aria-label="Username"
+                aria-describedby="addon-wrapping" value="{{$reg.FirstName}}">
+        </div>
+
+
+        <div class="mb-3">
+            <label for="lname" class="form-label w3-left">
+                <strong>
+                    Last Name
+                    {{with .Form.Errors.Get "lname"}}
+                    <label for="" class="text-danger">{{.}}</label>
+                    {{end}}
+                </strong>
+            </label>
+            <input type="text" class="form-control {{with .Form.Errors.Get "lname"}} is-invalid {{end}}" name="lname" placeholder="Enter last name" autocomplete="off"
+                aria-label="Username" aria-describedby="addon-wrapping" value="{{$reg.LastName}}">
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label w3-left">
+                <strong>
+                    Email
+                    {{with .Form.Errors.Get "email"}}
+                    <label for="" class="text-danger">{{.}}</label>
+                    {{end}}
+                </strong>
+            </label>
+            <input type="text" class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}" name="email" placeholder="Enter email address" autocomplete="off"
+                aria-label="Username" aria-describedby="addon-wrapping" value="{{$reg.Email}}">
+        </div>
+
+
+        <div class="mb-3">
+            <label for="phone" class="form-label w3-left">
+                <strong>
+                    Phone
+                    {{with .Form.Errors.Get "phone"}}
+                    <label for="" class="text-danger">{{.}}</label>
+                    {{end}}
+                </strong>
+            </label>
+            <input type="text" class="form-control {{with .Form.Errors.Get "phone"}} is-invalid {{end}}" name="phone" placeholder="Enter phone number" autocomplete="off"
+                aria-label="Username" aria-describedby="addon-wrapping" value="{{$reg.Phone}}">
+        </div>
+
+        <div class="mb-3">
+            <label for="pwd1" class="form-label w3-left">
+                <strong>
+                    Create password
+                    {{with .Form.Errors.Get "pwd1"}}
+                    <label for="" class="text-danger">{{.}}</label>
+                    {{end}}
+                </strong>
+            </label>
+            <input type="password" class="form-control {{with .Form.Errors.Get "pwd1"}} is-invalid {{end}}" name="pwd1" placeholder="Enter a password" autocomplete="off"
+                aria-label="Username" aria-describedby="addon-wrapping" value="{{$reg.PasswordCreate}}">
+        </div>
+
+        <div class="mb-3">
+            <label for="pwd2" class="form-label w3-left">
+                <strong>
+                    Confirm password
+                    {{with .Form.Errors.Get "pwd2"}}
+                    <label for="" class="text-danger">{{.}}</label>
+                    {{end}}
+                </strong>
+            </label>
+            <input type="password" class="form-control {{with .Form.Errors.Get "pwd2"}} is-invalid {{end}}" name="pwd2" placeholder="Retype the password" autocomplete="off"
+                aria-label="Username" aria-describedby="addon-wrapping" value="{{$reg.PasswordConfirm}}">
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+        <div class="input-group flex-nowrap w3-margin-top">
+            <input class="w3-btn w3-blue w3-ripple w3-round-large" type="submit" value="Sign Up">
+        </div>
+    </form>
+</div>
+
+{{end}}

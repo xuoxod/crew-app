@@ -1,0 +1,82 @@
+{{template "base" .}}
+{{ define "title"}}
+Registered
+{{end}}
+
+{{define "content"}}
+{{$reg := index .Data "registration"}}
+<div class="grid text-center">
+    <div class="row mb-2">
+        <h1 class="mt-5">
+            Registration Summary
+        </h1>
+    </div>
+
+    <hr>
+
+    <table class="table table-striped">
+        <thead></thead>
+        <tbody>
+            <tr>
+                <td>
+                    First Name:
+                </td>
+
+                <td>
+                    {{$reg.FirstName}}
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Last Name:
+                </td>
+
+                <td>
+                    {{$reg.LastName}}
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Email:
+                </td>
+
+                <td>
+                    {{$reg.Email}}
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Phone:
+                </td>
+
+                <td>
+                    {{$reg.Phone}}
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Created Password:
+                </td>
+
+                <td>
+                    {{$reg.PasswordCreate}}
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Confirmed Password:
+                </td>
+
+                <td>
+                    {{$reg.PasswordConfirm}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{{end}}

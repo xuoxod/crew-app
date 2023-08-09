@@ -42,10 +42,16 @@ func NewHandlers(r *Repository) {
 // @route       GET /
 // @access      Public
 func (m *Repository) HomePage(w http.ResponseWriter, r *http.Request) {
-	stringMap := make(map[string]string)
-	stringMap["subheading"] = "Welcome to my awesome Golang Crew Web Application"
+	var emptySigninForm models.Signin
+	data := make(map[string]interface{})
+	data["signin"] = emptySigninForm
 
-	render.Template(w, r, "home.page.tmpl", &models.TemplateData{StringMap: stringMap})
+	fmt.Printf("\n\tHome page\n")
+
+	render.Template(w, r, "home.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil),
+		Data: data,
+	})
 }
 
 // @desc        About page
@@ -70,8 +76,6 @@ func (m *Repository) RegisterPage(w http.ResponseWriter, r *http.Request) {
 		Form: forms.New(nil),
 		Data: data,
 	})
-	// stringMap := make(map[string]string)
-	// stringMap["subheading"] = "Registration"
 }
 
 // @desc        Register user
@@ -85,7 +89,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	registration := models.User{
+	newUser := models.User{
 		FirstName: r.Form.Get("fname"),
 		LastName:  r.Form.Get("lname"),
 		Email:     r.Form.Get("email"),
@@ -103,11 +107,9 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	form.PasswordsMatch("pwd1", "pwd2", r)
 	form.Required("fname", "lname", "email", "pwd1", "pwd2")
 
-	fmt.Printf("Form valid? %v", form.Valid())
-
 	if !form.Valid() {
 		data := make(map[string]interface{})
-		data["registration"] = registration
+		data["registration"] = newUser
 
 		render.Template(w, r, "register.page.tmpl", &models.TemplateData{
 			Form: form,
@@ -117,14 +119,30 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = m.DB.CreateUser(registration)
+	newUserID, err := m.DB.CreateUser(newUser)
 
 	if err != nil {
-		fmt.Printf("\n\tError creating new user\n\t%v\n\n", err)
+		fmt.Printf("\n\tError creating new user\n\t%v\n\n", err.Error())
+
+		m.App.Session.Put(r.Context(), "error", "User already registered")
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
 	}
 
-	m.App.Session.Put(r.Context(), "registration", registration)
+	craft := models.Craft{
+		Fname:  r.Form.Get("fname"),
+		Lname:  r.Form.Get("lname"),
+		UserID: newUserID,
+	}
+
+	_, err = m.DB.InsertCraft(craft)
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "registration", newUser)
 
 	http.Redirect(w, r, "/registrationsummary", http.StatusSeeOther)
 }
@@ -144,6 +162,9 @@ func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
 		Email:    r.Form.Get("email"),
 		Password: r.Form.Get("password"),
 	}
+
+	// form validation
+	fmt.Println("signin posted")
 
 	form := forms.New(r.PostForm)
 	form.IsEmail("email")
@@ -185,7 +206,6 @@ func (m *Repository) DummyHandler(w http.ResponseWriter, r *http.Request) {
 // @route       GET /registrationsummary
 // @access      Public
 func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request) {
-	// m.App.Session.Get("registration")
 	registration, ok := m.App.Session.Get(r.Context(), "registration").(models.Registration)
 
 	if !ok {

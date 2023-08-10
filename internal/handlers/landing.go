@@ -89,12 +89,13 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newUser := models.User{
-		FirstName: r.Form.Get("fname"),
-		LastName:  r.Form.Get("lname"),
-		Email:     r.Form.Get("email"),
-		Phone:     r.Form.Get("phone"),
-		Password:  r.Form.Get("pwd1"),
+	registration := models.Registration{
+		FirstName:       r.Form.Get("fname"),
+		LastName:        r.Form.Get("lname"),
+		Email:           r.Form.Get("email"),
+		Phone:           r.Form.Get("phone"),
+		PasswordCreate:  r.Form.Get("pwd1"),
+		PasswordConfirm: r.Form.Get("pwd2"),
 	}
 
 	// form validation
@@ -105,11 +106,11 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	form.MinLength("lname", 2, r)
 	form.IsEmail("email")
 	form.PasswordsMatch("pwd1", "pwd2", r)
-	form.Required("fname", "lname", "email", "pwd1", "pwd2")
+	form.Required("fname", "lname", "email", "phone", "pwd1", "pwd2")
 
 	if !form.Valid() {
 		data := make(map[string]interface{})
-		data["registration"] = newUser
+		data["registration"] = registration
 
 		render.Template(w, r, "register.page.tmpl", &models.TemplateData{
 			Form: form,
@@ -117,6 +118,14 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		})
 
 		return
+	}
+
+	newUser := models.User{
+		FirstName: r.Form.Get("fname"),
+		LastName:  r.Form.Get("lname"),
+		Email:     r.Form.Get("email"),
+		Phone:     r.Form.Get("phone"),
+		Password:  r.Form.Get("pwd1"),
 	}
 
 	newUserID, err := m.DB.CreateUser(newUser)
@@ -142,7 +151,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m.App.Session.Put(r.Context(), "registration", newUser)
+	m.App.Session.Put(r.Context(), "registration", registration)
 
 	http.Redirect(w, r, "/registrationsummary", http.StatusSeeOther)
 }

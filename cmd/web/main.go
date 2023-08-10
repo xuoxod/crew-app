@@ -80,7 +80,7 @@ func run() (*driver.DB, error) {
 	// Session middleware
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
-	session.Cookie.Persist = true
+	session.Cookie.Persist = app.InProduction
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = app.InProduction
 
@@ -105,8 +105,6 @@ func run() (*driver.DB, error) {
 	if err != nil {
 		log.Fatal("Cannot connect to database! Dying ...")
 	}
-
-	// defer db.SQL.Close()
 
 	tc, err := render.CreateTemplateCache()
 

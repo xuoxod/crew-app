@@ -25,10 +25,9 @@ Register
             </label>
 
             <input type="text" class="form-control {{with .Form.Errors.Get "fname"}} is-invalid {{end}}" name="fname"
-                placeholder="Enter first name" autocomplete="off" aria-label="Username"
+                placeholder="Enter first name" autocomplete="off" aria-label="fname"
                 aria-describedby="addon-wrapping" value="{{$reg.FirstName}}">
         </div>
-
 
         <div class="mb-3">
             <label for="lname" class="form-label w3-left">
@@ -55,7 +54,6 @@ Register
             <input type="text" class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}" name="email" placeholder="Enter email address" autocomplete="off"
                 aria-label="Username" aria-describedby="addon-wrapping" value="{{$reg.Email}}">
         </div>
-
 
         <div class="mb-3">
             <label for="phone" class="form-label w3-left">
@@ -103,5 +101,4 @@ Register
         </div>
     </form>
 </div>
-
 {{end}}

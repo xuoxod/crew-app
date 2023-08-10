@@ -2,26 +2,40 @@
 {{ define "title"}}
 Home
 {{end}}
+
 {{define "content"}}
-
 <div class="grid text-center" style="margin:10% auto;">
-  <h2 class="mb-5">{{index .StringMap "subheading"}}</h2>
+  <div class="row mb-2">
+    <h2 class="mb-5">Welcome to the Crew Assistant App</h2>
+  </div>
 
+{{$sig := index .Data "signin"}}
   <form action="/signin" method="post" class="needs-validation" novalidate>
-    <div class="input-group flex-nowrap mb-5">
-      <span class="input-group-text" id="addon-wrapping">
-        <i class="bi bi-envelope-at"></i>
-      </span>
-      <input type="text" class="w3-input" name="email" placeholder="Email" aria-label="Username"
-        aria-describedby="addon-wrapping" required>
+
+    <div class="mb-3">
+      <label for="email" class="form-label w3-left">
+        <strong>
+          Email
+          {{with .Form.Errors.Get "email"}}
+            <label for="" class="text-danger">{{.}}</label>
+          {{end}}
+        </strong>
+      </label>
+
+      <input type="text" class="form-control" id="email" name="email" placeholder="Enter account email" autocomplete="off" value="{{$sig.Email}}"/>
     </div>
 
-    <div class="input-group flex-nowrap">
-      <span class="input-group-text" id="addon-wrapping">
-        <i class="bi bi-lock"></i>
-      </span>
-      <input type="password" class="w3-input" name="password" placeholder="Password" aria-label="Username"
-        aria-describedby="addon-wrapping" required>
+    <div class="mb-3 mt-1">
+      <label for="password" class="form-label w3-left">
+        <strong>
+          Password
+          {{with .Form.Errors.Get "password"}}
+            <label for="" class="text-danger">{{.}}</label>
+          {{end}}
+        </strong>
+      </label>
+
+      <input type="password" class="form-control" id="password" name="password" placeholder="Enter login password" autocomplete="off" value="{{$sig.Password}}">
     </div>
 
     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
@@ -31,4 +45,4 @@ Home
     </div>
   </form>
 </div>
-{{ end }}
+{{end}}

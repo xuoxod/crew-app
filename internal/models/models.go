@@ -36,4 +36,5 @@ type Craft struct {
 	Lname   string
 	Title   string
 	CraftID int
+	UserID  int
 }

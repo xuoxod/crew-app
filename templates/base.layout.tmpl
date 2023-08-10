@@ -24,7 +24,11 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-          <a id="brand" class="navbar-brand" href="#">Crew Assistant</a>
+          <a id="brand" class="navbar-brand" href="#">
+            <strong>
+              CrewMate
+            </strong>
+          </a>
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a id="message" class="nav-link active" aria-current="page" href="/">Home</a>
@@ -47,20 +51,11 @@
       {{ end }}
     </div>
 
-    <!-- Footer -->
-<footer class="bg-dark text-center text-white">
-  <!-- Grid container -->
-  <div id="footer" class="container p-4">
-    
-  </div>
-</footer>
-<!-- Footer -->
-
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
       integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="/static/js/w3.js"></script>
-    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js" type="text/javascript"></script>
     <script src="/static/js/utils.js" type="module"></script>
     <script src="/static/js/computils.js" type="module"></script>
     <script src="/static/js/clientutils.js" type="module"></script>
@@ -75,7 +70,7 @@
       }
 
       {{with .Error}}
-        notify("{{.}}", "warning")
+        notify("{{.}}", "error")
       {{end}}     
 
       const brandLink = document.querySelector("#brand")

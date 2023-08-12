@@ -71,7 +71,15 @@
 
       {{with .Error}}
         notify("{{.}}", "error")
-      {{end}}     
+      {{end}}  
+      
+      {{with .Flash}}
+        notify("{{.}}", "success")
+      {{end}}   
+      
+      {{with .Warning}}
+        notify("{{.}}", "warning")
+      {{end}}      
 
       const brandLink = document.querySelector("#brand")
       brandLink.addEventListener("click",e=>{

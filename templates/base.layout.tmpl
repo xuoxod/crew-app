@@ -30,17 +30,27 @@
             </strong>
           </a>
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          {{if eq .IsAuthenticated 1}}
+
+            <li class="nav-item">
+              <a id="message" class="nav-link active" aria-current="page" href="/user/signout">Logout</a>
+            </li>
+
+          {{else}}
+
             <li class="nav-item">
               <a id="message" class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
             
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/about">About</a>
+              <a class="nav-link active" aria-current="page" href="/api/about">About</a>
             </li>
             
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/register">Register</a>
+              <a class="nav-link active" aria-current="page" href="/api/register">Register</a>
             </li>
+
+          {{end}}
           </ul>
         </div>
       </div>
@@ -65,7 +75,7 @@
         notie.alert({
           type: msgType,
           text: msg,
-          time: 3
+          time: 2
         })
       }
 

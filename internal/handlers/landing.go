@@ -147,7 +147,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 
 	m.App.Session.Put(r.Context(), "registration", registration)
 
-	http.Redirect(w, r, "/registrationsummary", http.StatusSeeOther)
+	http.Redirect(w, r, "/api/registrationsummary", http.StatusSeeOther)
 }
 
 // @desc        Signin user
@@ -201,7 +201,17 @@ func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
 
 	m.App.Session.Put(r.Context(), "user_id", id)
 	m.App.Session.Put(r.Context(), "flash", "Authenticated succesfully")
-	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+}
+
+// @desc        Signout user
+// @route       GET /signin
+// @access      Private
+func (m *Repository) SignOut(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.Destroy(r.Context())
+	_ = m.App.Session.RenewToken(r.Context())
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 type jsonResponse struct {
@@ -248,7 +258,7 @@ func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request)
 
 // @desc        Dashboard
 // @route       GET /dashboard
-// @access      Public
+// @access      Private
 func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 	stringMap := make(map[string]string)
 	stringMap["subheading"] = "Dashboard"

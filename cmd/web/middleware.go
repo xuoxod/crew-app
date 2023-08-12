@@ -50,3 +50,15 @@ func Auth(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func Unauth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if helpers.IsAuthenticated(r) {
+			session.Put(r.Context(), "warning", "Resource not found")
+			http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}

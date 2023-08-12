@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// Registration data
+// User registration data
 type Registration struct {
 	FirstName       string
 	LastName        string
@@ -12,12 +12,13 @@ type Registration struct {
 	PasswordConfirm string
 }
 
-// Signin data
+// User signin data
 type Signin struct {
 	Email    string
 	Password string
 }
 
+// User data
 type User struct {
 	ID          int
 	FirstName   string
@@ -30,11 +31,27 @@ type User struct {
 	UpdatedAt   time.Time
 }
 
+// Craft data
 type Craft struct {
 	ID      int
-	Fname   string
-	Lname   string
 	Title   string
 	CraftID int
-	UserID  int
+}
+
+// Run data
+type Run struct {
+	RunNumber     int
+	StartLocation string
+	StartTime     time.Time
+	EndTime       time.Time
+	LeaveTime     time.Time
+}
+
+// Crew member data
+type Crew struct {
+	RunNumber int
+	FirstName string
+	LastName  string
+	Phone     string
+	ID        int
 }

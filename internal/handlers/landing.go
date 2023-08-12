@@ -138,13 +138,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	craft := models.Craft{
-		Fname:  r.Form.Get("fname"),
-		Lname:  r.Form.Get("lname"),
-		UserID: newUserID,
-	}
-
-	_, err = m.DB.InsertCraft(craft)
+	fmt.Printf("\tNew user ID: %v\n", newUserID)
 
 	if err != nil {
 		helpers.ServerError(w, err)
@@ -160,6 +154,8 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 // @route       POST /signin
 // @access      Public
 func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.RenewToken(r.Context())
+
 	err := r.ParseForm()
 
 	if err != nil {
@@ -187,6 +183,24 @@ func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var email string
+	var password string
+
+	email = r.Form.Get("email")
+	password = r.Form.Get("password")
+
+	// Authenticate user
+	id, _, err := m.DB.Authenticate(email, password)
+
+	if err != nil {
+		log.Println("Authentication failed")
+		m.App.Session.Put(r.Context(), "error", "Invalid signin credentials")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "flash", "Authenticated succesfully")
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 

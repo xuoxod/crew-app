@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/xuoxod/crew-app/internal/config"
 	"github.com/xuoxod/crew-app/internal/driver"
@@ -59,7 +60,9 @@ func (m *Repository) HomePage(w http.ResponseWriter, r *http.Request) {
 // @access      Public
 func (m *Repository) AboutPage(w http.ResponseWriter, r *http.Request) {
 	stringMap := make(map[string]string)
-	stringMap["subheading"] = "Who we are is totally and completely irrelevant"
+	stringMap["appname"] = "CrewMate"
+	stringMap["appver"] = "Version 1.0"
+	stringMap["appdate"] = fmt.Sprint("Date: ", time.Now())
 
 	render.Template(w, r, "about.page.tmpl", &models.TemplateData{StringMap: stringMap})
 }

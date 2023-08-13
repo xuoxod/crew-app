@@ -4,12 +4,15 @@ About
 {{ end }}
 {{define "content"}}
 <div class="grid text-center" style="margin:10% auto;">
-  <ul class="w3-ul w3-card-4">
+  <ul class="w3-ul w3-card-4 w3-round-large">
     <li>
-      <h2>Crew Assistant Application</h2>
+      <h2><strong>{{index .StringMap "appname"}}</strong></h2>
     </li>
     <li class="w3-padding-small">
-      Version 1.0
+     <strong>{{index .StringMap "appver"}}</strong>
+    </li>
+    <li class="w3-padding-small">
+     <strong>{{index .StringMap "appdate"}}</strong>
     </li>
   </ul>
 </div>

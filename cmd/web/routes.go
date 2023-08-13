@@ -10,22 +10,11 @@ import (
 )
 
 func routes(app *config.AppConfig) http.Handler {
-	// mux := pat.New()
-
-	// mux.Get("/", http.HandlerFunc(handlers.Repo.Index))
-	// mux.Get("/about", http.HandlerFunc(handlers.Repo.About))
-
 	mux := chi.NewRouter()
 	mux.Use(middleware.Recoverer)
 	mux.Use(WriteToConsole)
 	mux.Use(NoSurf)
 	mux.Use(SessionLoad)
-	// mux.Get("/about", handlers.Repo.AboutPage)
-	// mux.Get("/register", handlers.Repo.RegisterPage)
-	// mux.Post("/register", handlers.Repo.PostRegisterPage)
-	// mux.Get("/registrationsummary", handlers.Repo.RegistrationSummary)
-	// mux.Post("/signin", handlers.Repo.SigninPage)
-	// mux.Get("/signout", handlers.Repo.SignOut)
 	mux.Get("/dummy", handlers.Repo.DummyHandler)
 
 	// Static files

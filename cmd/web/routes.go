@@ -20,7 +20,6 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Use(WriteToConsole)
 	mux.Use(NoSurf)
 	mux.Use(SessionLoad)
-	mux.Get("/", handlers.Repo.HomePage)
 	// mux.Get("/about", handlers.Repo.AboutPage)
 	// mux.Get("/register", handlers.Repo.RegisterPage)
 	// mux.Post("/register", handlers.Repo.PostRegisterPage)
@@ -32,6 +31,11 @@ func routes(app *config.AppConfig) http.Handler {
 	// Static files
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
+	mux.Route("/", func(mux chi.Router) {
+		mux.Use(Unauth)
+		mux.Get("/", handlers.Repo.HomePage)
+	})
 
 	mux.Route("/user", func(mux chi.Router) {
 		mux.Use(Auth)

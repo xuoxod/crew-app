@@ -34,6 +34,13 @@ func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	}
 }
 
+func NewTestRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+		DB:  dbrepo.NewTestingRepo(a),
+	}
+}
+
 // Sets the repository for the handlers
 func NewHandlers(r *Repository) {
 	Repo = r
@@ -49,7 +56,7 @@ func (m *Repository) HomePage(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("\n\tHome page\n")
 
-	render.Template(w, r, "home.page.tmpl", &models.TemplateData{
+	_ = render.Template(w, r, "home.page.tmpl", &models.TemplateData{
 		Form: forms.New(nil),
 		Data: data,
 	})
@@ -64,7 +71,7 @@ func (m *Repository) AboutPage(w http.ResponseWriter, r *http.Request) {
 	stringMap["appver"] = "Version 1.0"
 	stringMap["appdate"] = fmt.Sprint("Date: ", time.Now())
 
-	render.Template(w, r, "about.page.tmpl", &models.TemplateData{StringMap: stringMap})
+	_ = render.Template(w, r, "about.page.tmpl", &models.TemplateData{StringMap: stringMap})
 }
 
 // @desc        Registration page
@@ -75,7 +82,7 @@ func (m *Repository) RegisterPage(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 	data["registration"] = emptyRegistrationForm
 
-	render.Template(w, r, "register.page.tmpl", &models.TemplateData{
+	_ = render.Template(w, r, "register.page.tmpl", &models.TemplateData{
 		Form: forms.New(nil),
 		Data: data,
 	})
@@ -115,7 +122,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		data := make(map[string]interface{})
 		data["registration"] = registration
 
-		render.Template(w, r, "register.page.tmpl", &models.TemplateData{
+		_ = render.Template(w, r, "register.page.tmpl", &models.TemplateData{
 			Form: form,
 			Data: data,
 		})
@@ -182,7 +189,7 @@ func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
 		data := make(map[string]interface{})
 		data["signin"] = signin
 
-		render.Template(w, r, "home.page.tmpl", &models.TemplateData{Form: form, Data: data})
+		_ = render.Template(w, r, "home.page.tmpl", &models.TemplateData{Form: form, Data: data})
 		return
 	}
 
@@ -235,7 +242,7 @@ func (m *Repository) DummyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
+	_, _ = w.Write(out)
 }
 
 // @desc        Registration summary
@@ -256,7 +263,7 @@ func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request)
 	data := make(map[string]interface{})
 	data["registration"] = registration
 
-	render.Template(w, r, "registrationsummary.page.tmpl", &models.TemplateData{Data: data})
+	_ = render.Template(w, r, "registrationsummary.page.tmpl", &models.TemplateData{Data: data})
 }
 
 // @desc        Dashboard
@@ -268,5 +275,5 @@ func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 	stringMap["body"] = "This is the house that Jack built."
 	stringMap["footer"] = "This is the malt that lay in the house that Jack built."
 
-	render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{StringMap: stringMap})
+	_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{StringMap: stringMap})
 }

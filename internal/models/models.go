@@ -31,11 +31,19 @@ type User struct {
 	UpdatedAt   time.Time
 }
 
+// User profile
+type Profile struct {
+	UserName string
+	UserID   int
+	ImageURL string
+}
+
 // Craft data
 type Craft struct {
 	ID      int
 	Title   string
 	CraftID int
+	UserID  int
 }
 
 // Run data
@@ -45,6 +53,7 @@ type Run struct {
 	StartTime     time.Time
 	EndTime       time.Time
 	LeaveTime     time.Time
+	HOS           int
 }
 
 // Crew member data

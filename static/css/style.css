@@ -92,3 +92,7 @@
 .chat-profile-primary-photo-container img {
     display: inline-flex;
 }
+
+.link,a {
+    text-decoration: none;
+}

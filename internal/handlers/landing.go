@@ -277,24 +277,39 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	lastName := libs.Cap(results["lastName"])
 	_email := results["email"]
 	phone := results["phone"]
-	createdAt := strings.Split(results["createAt"], " ")[0]
+	imageUrl := results["imageUrl"]
+	userName := results["userName"]
+	// createdAt := results["createdAt"]
+	updatedAt := strings.Split(results["updatedAt"], " ")[0]
+	createdAt := strings.Split(results["createdAt"], " ")[0]
 
 	const layout = "2006-01-02"
-	timeDate, dateErr := time.Parse(layout, createdAt)
+	creationDate, creationErr := time.Parse(layout, createdAt)
 
-	if dateErr != nil {
-		helpers.ServerError(w, dateErr)
+	if creationErr != nil {
+		helpers.ServerError(w, creationErr)
+		return
+	}
+	updatedLast, updateErr := time.Parse(layout, updatedAt)
+
+	if updateErr != nil {
+		helpers.ServerError(w, updateErr)
 		return
 	}
 
-	fmt.Printf("\tUser is authenticated\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\n", firstName, lastName, _email, phone, timeDate)
+	fmt.Printf("User is authenticated\n\tID:\t%d\n\tFirst Name:\t%s\n\tLast Name:\t%s\n\tUser Name:\t%s\n\tImage URL:\t%s\n\tEmail:\t%s\n\tPhone:\t%s\n\tCreated At:\t%v\n\tUpdated At:\t%v\n\n", id, firstName, lastName, userName, imageUrl, _email, phone, createdAt, updatedAt)
 
 	loggedIn := models.User{
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     _email,
-		Phone:     phone,
-		CreatedAt: timeDate,
+		FirstName:    firstName,
+		LastName:     lastName,
+		Email:        _email,
+		Phone:        phone,
+		UserName:     userName,
+		ImageURL:     imageUrl,
+		CreatedAt:    creationDate,
+		UpdatedAt:    updatedLast,
+		CreationDate: createdAt,
+		Updated:      updatedAt,
 	}
 
 	data := make(map[string]interface{})
@@ -368,8 +383,8 @@ func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request)
 	_ = render.Template(w, r, "registrationsummary.page.tmpl", &models.TemplateData{Data: data})
 }
 
-// @desc        Dashboard
-// @route       GET /dashboard
+// @desc        Dashboard Page
+// @route       GET /user/dashboard
 // @access      Private
 func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
@@ -386,4 +401,50 @@ func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 	data["loggedin"] = loggedin
 
 	_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
+}
+
+// @desc        Settings Page
+// @route       GET /user/settings
+// @access      Private
+func (m *Repository) SettingsPage(w http.ResponseWriter, r *http.Request) {
+	var emptyUserForm models.User
+	data := make(map[string]interface{})
+	data["setting"] = emptyUserForm
+
+	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
+
+	if !ok {
+		log.Println("Cannot get item from session")
+		m.App.ErrorLog.Println("Can't get error from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data["loggedin"] = loggedin
+
+	_ = render.Template(w, r, "settings.page.tmpl", &models.TemplateData{Data: data, Form: forms.New(nil)})
+}
+
+// @desc        Profile Page
+// @route       GET /user/profile
+// @access      Private
+func (m *Repository) ProfilePage(w http.ResponseWriter, r *http.Request) {
+	var emptyUserForm models.User
+	data := make(map[string]interface{})
+	data["profile"] = emptyUserForm
+
+	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
+
+	if !ok {
+		log.Println("Cannot get item from session")
+		m.App.ErrorLog.Println("Can't get error from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data["loggedin"] = loggedin
+
+	_ = render.Template(w, r, "profile.page.tmpl", &models.TemplateData{Data: data, Form: forms.New(nil)})
 }

@@ -20,15 +20,19 @@ type Signin struct {
 
 // User data
 type User struct {
-	ID          int
-	FirstName   string
-	LastName    string
-	Email       string
-	Phone       string
-	Password    string
-	AccessLevel int
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID           int
+	FirstName    string
+	LastName     string
+	UserName     string
+	ImageURL     string
+	Email        string
+	Phone        string
+	Password     string
+	AccessLevel  int
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	CreationDate string
+	Updated      string
 }
 
 // User profile

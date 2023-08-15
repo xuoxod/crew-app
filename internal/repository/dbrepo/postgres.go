@@ -177,13 +177,13 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 	defer cancel()
 
 	var results = make(map[string]string)
-	var id int
-	var firstName, lastName, _email, phone, hashedPassword string
-	var createdAt time.Time
+	var userId int
+	var firstName, lastName, _email, phone, hashedPassword, userName, imageUrl string
+	var createdAt, updatedAt time.Time
 
-	row := m.DB.QueryRowContext(ctx, "select id,first_name,last_name,email,phone,created_at, password from users where email = $1", email)
+	row := m.DB.QueryRowContext(ctx, "select user_id, first_name, last_name, email, phone, created_at, updated_at, password, user_name, image_url from users u inner join profiles p on p.profile_id = u.profile_id where u.profile_id = p.profile_id and email = $1", email)
 
-	err := row.Scan(&id, &firstName, &lastName, &_email, &phone, &createdAt, &hashedPassword)
+	err := row.Scan(&userId, &firstName, &lastName, &_email, &phone, &createdAt, &updatedAt, &hashedPassword, &userName, &imageUrl)
 
 	if err != nil {
 		log.Printf("\n\tScan error:\n\t%s\n\n", err.Error())
@@ -203,12 +203,15 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 		return results
 	}
 
-	results["id"] = fmt.Sprintf("%d", id)
+	results["id"] = fmt.Sprintf("%d", userId)
 	results["firstName"] = firstName
 	results["lastName"] = lastName
+	results["userName"] = userName
 	results["email"] = email
 	results["phone"] = phone
-	results["createAt"] = createdAt.String()
+	results["imageUrl"] = imageUrl
+	results["createdAt"] = createdAt.String()
+	results["updatedAt"] = updatedAt.String()
 	results["err"] = ""
 
 	return results

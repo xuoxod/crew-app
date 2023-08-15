@@ -1,0 +1,118 @@
+{{template "admin" .}}
+{{ define "title"}}
+Settings
+{{end}}
+
+{{define "content"}}
+<div class="row">
+    {{$user := index .Data "loggedin"}}
+    <div class="col-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="w3-container w3-margin">
+                    <div class="w3-container w3-row">
+                        <form action="/settings" method="post" class="needs-validation" novalidate>
+
+                            <div class="mb-3">
+                                <label for="fname" class="form-label w3-left">
+                                    <strong>
+                                        First Name
+                                        {{with .Form.Errors.Get "fname"}}
+                                        <label for="" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+
+                                <input type="text" class="form-control {{with .Form.Errors.Get "fname"}} is-invalid
+                                    {{end}}" name="fname" placeholder="Enter first name" autocomplete="off"
+                                    aria-label="First Name" aria-describedby="addon-wrapping" value="{{$user.FirstName}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="lname" class="form-label w3-left">
+                                    <strong>
+                                        Last Name
+                                        {{with .Form.Errors.Get "lname"}}
+                                        <label for="" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "lname"}} is-invalid
+                                    {{end}}" name="lname" placeholder="Enter last name" autocomplete="off"
+                                    aria-label="Last Name" aria-describedby="addon-wrapping" value="{{$user.LastName}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="uname" class="form-label w3-left">
+                                    <strong>
+                                        Username
+                                        {{with .Form.Errors.Get "uname"}}
+                                        <label for="" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "uname"}} is-invalid
+                                    {{end}}" name="uname" placeholder="Enter last name" autocomplete="off"
+                                    aria-label="Username" aria-describedby="addon-wrapping" value="{{$user.UserName}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label w3-left">
+                                    <strong>
+                                        Email
+                                        {{with .Form.Errors.Get "email"}}
+                                        <label for="" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "email"}} is-invalid
+                                    {{end}}" name="email" placeholder="Enter email address" autocomplete="off"
+                                    aria-label="Username" aria-describedby="addon-wrapping" value="{{$user.Email}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label w3-left">
+                                    <strong>
+                                        Phone
+                                        {{with .Form.Errors.Get "phone"}}
+                                        <label for="" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "phone"}} is-invalid
+                                    {{end}}" name="phone" placeholder="Enter phone number" autocomplete="off"
+                                    aria-label="Username" aria-describedby="addon-wrapping" value="{{$user.Phone}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="createdat" class="form-label w3-left">
+                                    <strong>
+                                        Creation Date
+                                    </strong>
+                                </label>
+                                <input type="date" class="form-control" readonly name="createdat" autocomplete="off"
+                                    aria-label="Creation Date" aria-describedby="addon-wrapping" value="{{$user.CreationDate}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="updatedat" class="form-label w3-left">
+                                    <strong>
+                                        Last Updated
+                                    </strong>
+                                </label>
+                                <input type="date" class="form-control" readonly name="updatedat" autocomplete="off"
+                                    aria-label="Update Date" aria-describedby="addon-wrapping" value="{{$user.Updated}}">
+                            </div>                                 
+
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+                            <div class="input-group flex-nowrap w3-margin-top">
+                                <input class="w3-btn w3-blue w3-ripple w3-round-large" type="submit" value="Update">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}

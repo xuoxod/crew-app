@@ -35,6 +35,8 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Route("/user", func(mux chi.Router) {
 		mux.Use(Auth)
 		mux.Get("/dashboard", handlers.Repo.Dashboard)
+		mux.Get("/settings", handlers.Repo.SettingsPage)
+		mux.Get("/profile", handlers.Repo.ProfilePage)
 		mux.Get("/signout", handlers.Repo.SignOut)
 	})
 

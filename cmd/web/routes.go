@@ -29,6 +29,7 @@ func routes(app *config.AppConfig) http.Handler {
 		mux.Post("/register", handlers.Repo.PostRegisterPage)
 		mux.Get("/registrationsummary", handlers.Repo.RegistrationSummary)
 		mux.Post("/signin", handlers.Repo.SigninPage)
+		mux.Post("/login", handlers.Repo.LoginPage)
 	})
 
 	mux.Route("/user", func(mux chi.Router) {

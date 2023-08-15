@@ -40,3 +40,9 @@ func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, erro
 	var hashedPassword string
 	return id, hashedPassword, nil
 }
+
+func (m *testDBRepo) AuthenticateUser(email, testPassword string) map[string]string {
+	results := make(map[string]string)
+
+	return results
+}

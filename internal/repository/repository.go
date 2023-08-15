@@ -9,5 +9,6 @@ type DatabaseRepo interface {
 	GetUserByEmail(email string) (models.User, error)
 	UpdateUser(u models.User) error
 	Authenticate(email, testPassword string) (int, string, error)
+	AuthenticateUser(email, testPassword string) map[string]string
 	InsertCraft(c models.Craft) (int, error)
 }

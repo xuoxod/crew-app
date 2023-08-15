@@ -3,6 +3,8 @@ package dbrepo
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/xuoxod/crew-app/internal/models"
@@ -168,4 +170,46 @@ func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, 
 	}
 
 	return id, hashedPassword, nil
+}
+
+func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string]string {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var results = make(map[string]string)
+	var id int
+	var firstName, lastName, _email, phone, hashedPassword string
+	var createdAt time.Time
+
+	row := m.DB.QueryRowContext(ctx, "select id,first_name,last_name,email,phone,created_at, password from users where email = $1", email)
+
+	err := row.Scan(&id, &firstName, &lastName, &_email, &phone, &createdAt, &hashedPassword)
+
+	if err != nil {
+		log.Printf("\n\tScan error:\n\t%s\n\n", err.Error())
+		results["err"] = err.Error()
+		return results
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(testPassword))
+
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		log.Println("Authentication failed")
+		results["err"] = ""
+		return results
+	} else if err != nil {
+		log.Printf("\nError:\n\t%s\n\n", err.Error())
+		results["err"] = err.Error()
+		return results
+	}
+
+	results["id"] = fmt.Sprintf("%d", id)
+	results["firstName"] = firstName
+	results["lastName"] = lastName
+	results["email"] = email
+	results["phone"] = phone
+	results["createAt"] = createdAt.String()
+	results["err"] = ""
+
+	return results
 }

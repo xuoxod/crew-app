@@ -2,15 +2,19 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/xuoxod/crew-app/internal/config"
 	"github.com/xuoxod/crew-app/internal/driver"
 	"github.com/xuoxod/crew-app/internal/forms"
 	"github.com/xuoxod/crew-app/internal/helpers"
+	"github.com/xuoxod/crew-app/internal/libs"
 	"github.com/xuoxod/crew-app/internal/models"
 	"github.com/xuoxod/crew-app/internal/render"
 	"github.com/xuoxod/crew-app/internal/repository"
@@ -157,7 +161,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 
 	m.App.Session.Put(r.Context(), "registration", registration)
 
-	http.Redirect(w, r, "/api/registrationsummary", http.StatusSeeOther)
+	http.Redirect(w, r, "/registrationsummary", http.StatusSeeOther)
 }
 
 // @desc        Signin user
@@ -214,10 +218,108 @@ func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
 }
 
+// @desc        Signin user
+// @route       POST /signin
+// @access      Public
+func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.RenewToken(r.Context())
+
+	err := r.ParseForm()
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	signin := models.Signin{
+		Email:    r.Form.Get("email"),
+		Password: r.Form.Get("password"),
+	}
+
+	// form validation
+	fmt.Println("signin posted")
+
+	form := forms.New(r.PostForm)
+	form.IsEmail("email")
+	form.Required("email", "password")
+
+	if !form.Valid() {
+		data := make(map[string]interface{})
+		data["signin"] = signin
+
+		_ = render.Template(w, r, "home.page.tmpl", &models.TemplateData{Form: form, Data: data})
+		return
+	}
+
+	var email string
+	var password string
+
+	email = r.Form.Get("email")
+	password = r.Form.Get("password")
+
+	// Authenticate user
+	results := m.DB.AuthenticateUser(email, password)
+
+	if results["err"] != "" {
+		log.Println("unable to authenticate user")
+		err = errors.New("unable to authenticate user")
+	}
+
+	if err != nil {
+		log.Println("Authentication failed")
+		m.App.Session.Put(r.Context(), "error", "Invalid signin credentials")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	id, _ := strconv.Atoi(results["id"])
+	firstName := libs.Cap(results["firstName"])
+	lastName := libs.Cap(results["lastName"])
+	_email := results["email"]
+	phone := results["phone"]
+	createdAt := strings.Split(results["createAt"], " ")[0]
+
+	const layout = "2006-01-02"
+	timeDate, dateErr := time.Parse(layout, createdAt)
+
+	if dateErr != nil {
+		helpers.ServerError(w, dateErr)
+		return
+	}
+
+	fmt.Printf("\tUser is authenticated\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\n", firstName, lastName, _email, phone, timeDate)
+
+	loggedIn := models.User{
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     _email,
+		Phone:     phone,
+		CreatedAt: timeDate,
+	}
+
+	data := make(map[string]interface{})
+	data["loggedin"] = loggedIn
+
+	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "loggedin", loggedIn)
+
+	http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+}
+
 // @desc        Signout user
 // @route       GET /signin
 // @access      Private
 func (m *Repository) SignOut(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.Destroy(r.Context())
+	_ = m.App.Session.RenewToken(r.Context())
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// @desc        Logout user
+// @route       GET /signin
+// @access      Private
+func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.Destroy(r.Context())
 	_ = m.App.Session.RenewToken(r.Context())
 
@@ -270,10 +372,18 @@ func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request)
 // @route       GET /dashboard
 // @access      Private
 func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
-	stringMap := make(map[string]string)
-	stringMap["subheading"] = "Dashboard"
-	stringMap["body"] = "This is the house that Jack built."
-	stringMap["footer"] = "This is the malt that lay in the house that Jack built."
+	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
 
-	_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{StringMap: stringMap})
+	if !ok {
+		log.Println("Cannot get item from session")
+		m.App.ErrorLog.Println("Can't get error from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["loggedin"] = loggedin
+
+	_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
 }

@@ -46,3 +46,15 @@ func (m *testDBRepo) AuthenticateUser(email, testPassword string) map[string]str
 
 	return results
 }
+
+func (m *testDBRepo) UpdateUserProfile(u models.User) map[string]string {
+
+	results := make(map[string]string)
+
+	return results
+}
+
+func (m *testDBRepo) CreateUserProfile(u models.Profile) map[string]string {
+	results := make(map[string]string)
+	return results
+}

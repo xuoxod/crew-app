@@ -1,0 +1,6 @@
+*.txt
+*.env
+.env
+go*
+scratch*
+node_modules

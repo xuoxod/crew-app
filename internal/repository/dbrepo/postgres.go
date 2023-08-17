@@ -22,7 +22,7 @@ func (m *postgresDBRepo) CreateUser(res models.User) (int, error) {
 
 	var newID int
 
-	stmt := `insert into krxbyhhs.public.users(first_name, last_name, email, phone, password,created_at,updated_at)
+	stmt := `insert into krxbyhhs.public.members(first_name, last_name, email, phone, password, created_at, updated_at)
 	values($1,$2,$3,$4,$5,$6,$7) returning id`
 
 	err := m.DB.QueryRowContext(ctx, stmt,
@@ -39,7 +39,7 @@ func (m *postgresDBRepo) CreateUser(res models.User) (int, error) {
 		return 0, err
 	}
 
-	return 0, nil
+	return newID, nil
 }
 
 func (m *postgresDBRepo) InsertCraft(r models.Craft) (int, error) {
@@ -146,6 +146,59 @@ func (m *postgresDBRepo) UpdateUser(u models.User) error {
 
 }
 
+func (m *postgresDBRepo) CreateUserProfile(u models.Profile) map[string]string {
+
+	return nil
+}
+
+func (m *postgresDBRepo) UpdateUserProfile(u models.User) map[string]string {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+	var results = make(map[string]string)
+
+	query := `
+		update users set first_name = $1, last_name =$2, email = $3, phone = $4, updated_at = $5
+	`
+
+	result, err := m.DB.ExecContext(ctx, query,
+		u.FirstName,
+		u.LastName,
+		u.Email,
+		u.Phone,
+		time.Now(),
+	)
+
+	if err != nil {
+		results["err"] = "Update query failed"
+		return results
+	}
+
+	results["err"] = ""
+
+	rows, err := result.RowsAffected()
+
+	if err != nil {
+		results["userUpdateErr"] = "User update failed"
+	}
+
+	var userStatus string
+
+	if rows == 1 {
+		userStatus = "success"
+	} else {
+		userStatus = "failed"
+	}
+
+	results["userStatus"] = userStatus
+
+	// query = `
+	// update profiles set user_name = $1, image_url = $2 where profile_id = $3`
+
+	return results
+
+}
+
 func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -177,17 +230,57 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 	defer cancel()
 
 	var results = make(map[string]string)
-	var userId int
-	var firstName, lastName, _email, phone, hashedPassword, userName, imageUrl string
+	// var userId, accessLevel int
+	var accessLevel, id int
+	var firstName, lastName, emailAddress, phone, hashedPassword, userName, imgUrl string
 	var createdAt, updatedAt time.Time
 
-	row := m.DB.QueryRowContext(ctx, "select user_id, first_name, last_name, email, phone, created_at, updated_at, password, user_name, image_url from users u inner join profiles p on p.profile_id = u.profile_id where u.profile_id = p.profile_id and email = $1", email)
+	/* row := m.DB.QueryRowContext(ctx, "select id, first_name, last_name, email, phone, access_level, created_at, updated_at, password from members where email = $1", email)
 
-	err := row.Scan(&userId, &firstName, &lastName, &_email, &phone, &createdAt, &updatedAt, &hashedPassword, &userName, &imageUrl)
+	err := row.Scan(&userId, &firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword) */
+
+	/* row := m.DB.QueryRowContext(ctx, "select first_name, last_name, email, phone, access_level, created_at, updated_at, password, user_name, image_url from members m left join profiles p ON p.member_id = p.member_id  where p.member_id = m.id and email = $1", email) */
+
+	row := m.DB.QueryRowContext(ctx, "select first_name, last_name, email, phone, access_level, created_at, updated_at, password, user_name, image_url from members m left join profiles p on p.member_id = p.member_id where p.member_id = m.id and email = $1", email)
+
+	err := row.Scan(&firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword, &userName, &imgUrl)
 
 	if err != nil {
-		log.Printf("\n\tScan error:\n\t%s\n\n", err.Error())
-		results["err"] = err.Error()
+		log.Printf("\n\tScan error:\n\t%s\n", err.Error())
+		log.Printf("\n\tRunning query for members only\n\n")
+
+		row = m.DB.QueryRowContext(ctx, "select id, first_name, last_name, email, phone, access_level, created_at, updated_at, password from members where email = $1", email)
+
+		err = row.Scan(&id, &firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword)
+
+		if err != nil {
+			log.Printf("\n\tScan error:\n\t%s\n\n", err.Error())
+			results["err"] = err.Error()
+			return results
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(testPassword))
+
+		if err == bcrypt.ErrMismatchedHashAndPassword {
+			log.Println("Authentication failed")
+			results["err"] = ""
+			return results
+		} else if err != nil {
+			log.Printf("\nError:\n\t%s\n\n", err.Error())
+			results["err"] = err.Error()
+			return results
+		}
+
+		results["userID"] = fmt.Sprintf("%d", id)
+		results["firstName"] = firstName
+		results["lastName"] = lastName
+		results["email"] = email
+		results["phone"] = phone
+		results["accessLevel"] = fmt.Sprintf("%d", accessLevel)
+		results["createdAt"] = createdAt.String()
+		results["updatedAt"] = updatedAt.String()
+		results["err"] = ""
+		results["profileStatus"] = "noprofile"
 		return results
 	}
 
@@ -203,16 +296,17 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 		return results
 	}
 
-	results["id"] = fmt.Sprintf("%d", userId)
+	// results["userID"] = fmt.Sprintf("%d", userId)
 	results["firstName"] = firstName
 	results["lastName"] = lastName
-	results["userName"] = userName
 	results["email"] = email
 	results["phone"] = phone
-	results["imageUrl"] = imageUrl
+	results["accessLevel"] = fmt.Sprintf("%d", accessLevel)
 	results["createdAt"] = createdAt.String()
 	results["updatedAt"] = updatedAt.String()
+	results["userName"] = userName
+	results["imgUrl"] = imgUrl
+	results["profileStatus"] = "hasprofile"
 	results["err"] = ""
-
 	return results
 }

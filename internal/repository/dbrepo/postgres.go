@@ -314,10 +314,6 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 			return results
 		}
 
-		const layout = "2006-01-02"
-		creationDate, _ := time.Parse(layout, createdAt.String())
-		updatedDate, _ := time.Parse(layout, updatedAt.String())
-
 		results["userID"] = fmt.Sprintf("%d", id)
 		results["firstName"] = firstName
 		results["lastName"] = lastName
@@ -325,10 +321,8 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 		results["phone"] = phone
 		results["accessLevel"] = fmt.Sprintf("%d", accessLevel)
 		results["craftID"] = fmt.Sprintf("%d", craftId)
-		// results["createdAt"] = createdAt.String()
-		results["createdAt"] = creationDate.String()
-		// results["updatedAt"] = updatedAt.String()
-		results["updatedAt"] = updatedDate.String()
+		results["createdAt"] = createdAt.String()
+		results["updatedAt"] = updatedAt.String()
 		results["err"] = ""
 		results["profileStatus"] = "noprofile"
 		return results

@@ -559,22 +559,22 @@ func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request
 	userId, _ := strconv.Atoi(results["userID"])
 	craftId, _ := strconv.Atoi(results["craftID"])
 
-	const layout = "2006-01-02"
-	creationDate, _ := time.Parse(layout, results["createdAt"])
-	updatedDate, _ := time.Parse(layout, results["updatedAt"])
+	/* 	const layout = "2006-01-02"
+	   	creationDate, _ := time.Parse(layout, results["createdAt"])
+	   	updatedDate, _ := time.Parse(layout, results["updatedAt"]) */
 
 	loggedIn := models.User{
-		FirstName: results["firstName"],
-		LastName:  results["lastName"],
-		ID:        userId,
-		Email:     results["email"],
-		Phone:     results["phone"],
-		CraftID:   craftId,
-		Username:  results["userName"],
-		ImageURL:  results["imageUrl"],
-		CreatedAt: creationDate,
-		UpdatedAt: updatedDate,
-		HasID:     "yes",
+		FirstName:    results["firstName"],
+		LastName:     results["lastName"],
+		ID:           userId,
+		Email:        results["email"],
+		Phone:        results["phone"],
+		CraftID:      craftId,
+		Username:     results["userName"],
+		ImageURL:     results["imageUrl"],
+		CreationDate: results["createdAt"],
+		Updated:      results["updatedAt"],
+		HasID:        "yes",
 	}
 
 	fmt.Println("\tUpdated User Profile Data")

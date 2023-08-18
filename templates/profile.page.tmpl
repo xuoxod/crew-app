@@ -142,7 +142,7 @@ Profile
                                         Creation Date
                                     </strong>
                                 </label>
-                                <input type="text" class="form-control" readonly name="createdat" autocomplete="off"
+                                <input type="date" class="form-control" readonly name="createdat" autocomplete="off"
                                     aria-label="Creation Date" aria-describedby="addon-wrapping" value="{{$user.CreationDate}}">
                             </div>
 
@@ -152,7 +152,7 @@ Profile
                                         Last Updated
                                     </strong>
                                 </label>
-                                <input type="text" class="form-control" readonly name="updatedat" autocomplete="off" aria-label="Update Date" aria-describedby="addon-wrapping" value="{{$user.Updated}}">
+                                <input type="date" class="form-control" readonly name="updatedat" autocomplete="off" aria-label="Update Date" aria-describedby="addon-wrapping" value="{{$user.Updated}}">
                             </div>                                 
 
                             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">

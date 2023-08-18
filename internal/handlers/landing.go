@@ -281,6 +281,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	emailAddress := results["email"]
 	phone := results["phone"]
 	accessLevel, _ := strconv.Atoi(results["accessLevel"])
+	craftID, _ := strconv.Atoi(results["craftID"])
 	updatedAt := strings.Split(results["updatedAt"], " ")[0]
 	createdAt := strings.Split(results["createdAt"], " ")[0]
 	userName := results["userName"]
@@ -312,11 +313,13 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 			Email:        emailAddress,
 			Phone:        phone,
 			AccessLevel:  accessLevel,
+			CraftID:      craftID,
 			CreatedAt:    creationDate,
 			UpdatedAt:    updatedLast,
 			CreationDate: createdAt,
 			Updated:      updatedAt,
 			ImageURL:     "no",
+			HasID:        "yes",
 		}
 
 		data := make(map[string]interface{})
@@ -327,7 +330,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
 	case "hasprofile":
-		fmt.Printf("User is authenticated with a profile\n\tID:\t%d\n\tFirst Name:\t%s\n\tLast Name:\t%s\n\tEmail:\t%s\n\tPhone:\t%s\n\tCreated At:\t%v\n\tUpdated At:\t%v\n\tUsername:\t%v\nImage URL:\t%v\n\n", userID, firstName, lastName, emailAddress, phone, createdAt, updatedAt, userName, imgUrl)
+		fmt.Printf("User is authenticated with a profile\n\tFirst Name:\t%s\n\tLast Name:\t%s\n\tEmail:\t%s\n\tPhone:\t%s\n\tCreated At:\t%v\n\tUpdated At:\t%v\n\tUsername:\t%v\n\tImage URL:\t%v\n\n", firstName, lastName, emailAddress, phone, createdAt, updatedAt, userName, imgUrl)
 
 		loggedIn := models.User{
 			FirstName:    firstName,
@@ -479,37 +482,40 @@ func (m *Repository) ProfilePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data["loggedin"] = loggedin
+	// fmt.Printf("\n\n\t\tLoggedin Data:\t\t%v\n\n", loggedin)
 
-	_ = render.Template(w, r, "profile.page.tmpl", &models.TemplateData{Data: data, Form: forms.New(nil)})
+	data["loggedin"] = loggedin
+	_ = render.Template(w, r, "profile.page.tmpl", &models.TemplateData{
+		Data: data,
+		Form: forms.New(nil),
+	})
 }
 
 // @desc        Update user profile
 // @route       POST /signin
 // @access      private
-func (m *Repository) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request) {
+	// Remove the old user data from the session
+	m.App.Session.Remove(r.Context(), "loggedin")
+
 	err := r.ParseForm()
 
 	if err != nil {
+		fmt.Printf("\n\tError parsing user profile form")
 		helpers.ServerError(w, err)
 		return
 	}
 
-	user_id, err := strconv.Atoi(r.Form.Get("user_id"))
-
-	if err != nil {
-		fmt.Println("user_id conversion failed")
-	}
-
 	updatedUser := models.User{
-		ID:        user_id,
 		FirstName: r.Form.Get("fname"),
 		LastName:  r.Form.Get("lname"),
 		Email:     r.Form.Get("email"),
 		Phone:     r.Form.Get("phone"),
+		Username:  r.Form.Get("uname"),
+		ImageURL:  r.Form.Get("imgurl"),
 	}
 
-	fmt.Printf("\n\tUpdate User Post\nFirst Name:\t%s\nLast Name:\t%s\nUsername:\t%s\n\n", r.Form.Get("fname"), r.Form.Get("lname"), r.Form.Get("uname"))
+	// fmt.Printf("Parsed Form:\t%v\n", updatedUser)
 
 	// form validation
 
@@ -520,6 +526,7 @@ func (m *Repository) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
 	form.Required("email", "fname", "lname", "uname", "phone", "imgurl")
 
 	if !form.Valid() {
+		fmt.Printf("\n\tForm Error:\t%v\n\n", form.Errors)
 		loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
 
 		if !ok {
@@ -531,7 +538,6 @@ func (m *Repository) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		data := make(map[string]interface{})
-		data["updateuser"] = updatedUser
 		data["loggedin"] = loggedin
 
 		_ = render.Template(w, r, "profile.page.tmpl", &models.TemplateData{
@@ -540,6 +546,46 @@ func (m *Repository) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	// fmt.Printf("\nUpdate the user's profile\n")
+	results := m.DB.UpdateUserProfile(updatedUser)
+
+	// fmt.Printf("\n\n\t\tUpdated User Profile Data\n\t\t\t%v\n\n", results)
+
+	if results["err"] != "" {
+		fmt.Printf("\n\tProfile update error: %s\n\n", results["err"])
+	}
+
+	userId, _ := strconv.Atoi(results["userID"])
+	craftId, _ := strconv.Atoi(results["craftID"])
+
+	loggedIn := models.User{
+		FirstName:    results["firstName"],
+		LastName:     results["lastName"],
+		ID:           userId,
+		Email:        results["email"],
+		Phone:        results["phone"],
+		CraftID:      craftId,
+		Username:     results["userName"],
+		ImageURL:     results["imageUrl"],
+		CreationDate: results["createdAt"],
+		Updated:      results["updatedAt"],
+		HasID:        "yes",
+	}
+
+	fmt.Println("\tUpdated User Profile Data")
+	fmt.Println("User ID: ", results["userID"])
+	fmt.Println("First Name: ", results["firstName"])
+	fmt.Println("Last Name: ", results["lastName"])
+	fmt.Println("Email: ", results["email"])
+	fmt.Println("Phone: ", results["phone"])
+	fmt.Println("Craft ID: ", results["craftID"])
+	fmt.Println("Created: ", results["createdAt"])
+	fmt.Println("Updated: ", results["updatedAt"])
+	fmt.Printf("\n\n")
+
+	// Add the update user data to the session
+	m.App.Session.Put(r.Context(), "loggedin", loggedIn)
 
 	http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
 }
@@ -567,9 +613,9 @@ func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
 		LastName:  r.Form.Get("lname"),
 		Email:     r.Form.Get("email"),
 		Phone:     r.Form.Get("phone"),
+		Username:  r.Form.Get("uname"),
+		ImageURL:  r.Form.Get("imgurl"),
 	}
-
-	fmt.Printf("\n\tUpdate User Post\nFirst Name:\t%s\nLast Name:\t%s\nUsername:\t%s\n\n", r.Form.Get("fname"), r.Form.Get("lname"), r.Form.Get("uname"))
 
 	// form validation
 
@@ -577,7 +623,7 @@ func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
 	form.MinLength("fname", 2, r)
 	form.MinLength("lname", 2, r)
 	form.IsEmail("email")
-	form.Required("email", "fname", "lname", "uname", "phone", "imgurl")
+	// form.Required("email", "fname", "lname", "uname", "phone", "imgurl")
 
 	if !form.Valid() {
 		loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
@@ -586,20 +632,21 @@ func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
 			log.Println("Cannot get item from session")
 			m.App.ErrorLog.Println("Can't get error from the session")
 			m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
-			http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
 			return
 		}
 
 		data := make(map[string]interface{})
-		data["updateuser"] = updatedUser
 		data["loggedin"] = loggedin
 
 		_ = render.Template(w, r, "profile.page.tmpl", &models.TemplateData{
 			Form: form,
 			Data: data,
 		})
-		return
 	}
+
+	results := m.DB.CreateUserProfile(updatedUser)
+
+	fmt.Printf("\n\n\t\tCreate User Profile Data\n\t\t\t%v\n\n", results)
 
 	http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
 }

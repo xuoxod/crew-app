@@ -1,8 +1,6 @@
 package dbrepo
 
-import (
-	"github.com/xuoxod/crew-app/internal/models"
-)
+import "github.com/xuoxod/crew-app/internal/models"
 
 func (m *testDBRepo) AllUsers() bool {
 	return true
@@ -29,12 +27,6 @@ func (m *testDBRepo) GetUserByEmail(email string) (models.User, error) {
 	return u, nil
 }
 
-func (m *testDBRepo) UpdateUser(u models.User) error {
-
-	return nil
-
-}
-
 func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
 	var id int
 	var hashedPassword string
@@ -54,7 +46,7 @@ func (m *testDBRepo) UpdateUserProfile(u models.User) map[string]string {
 	return results
 }
 
-func (m *testDBRepo) CreateUserProfile(u models.Profile) map[string]string {
+func (m *testDBRepo) CreateUserProfile(u models.User) map[string]string {
 	results := make(map[string]string)
 	return results
 }

@@ -27,6 +27,7 @@ type User struct {
 	Phone         string
 	Password      string
 	AccessLevel   int
+	CraftID       int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	CreationDate  string
@@ -34,6 +35,7 @@ type User struct {
 	ProfileStatus string
 	ImageURL      string
 	Username      string
+	HasID         string
 }
 
 // User profile

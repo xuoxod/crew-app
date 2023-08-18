@@ -121,80 +121,129 @@ func (m *postgresDBRepo) GetUserByEmail(email string) (models.User, error) {
 	return u, nil
 }
 
-func (m *postgresDBRepo) UpdateUser(u models.User) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-
-	defer cancel()
-
-	query := `
-		update users set first_name = $1, last_name =$2, email = $3, access_level = $4, updated_at = $5
-	`
-
-	_, err := m.DB.ExecContext(ctx, query,
-		u.FirstName,
-		u.LastName,
-		u.Email,
-		u.AccessLevel,
-		time.Now(),
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-
-}
-
-func (m *postgresDBRepo) CreateUserProfile(u models.Profile) map[string]string {
-
-	return nil
+func (m *postgresDBRepo) CreateUserProfile(u models.User) map[string]string {
+	var results = make(map[string]string)
+	results["FirstName"] = u.FirstName
+	results["LastName"] = u.LastName
+	results["UserName"] = u.Username
+	results["EmailAddress"] = u.Email
+	results["ImageURL"] = u.ImageURL
+	results["UserID"] = fmt.Sprintf("%d", u.ID)
+	return results
 }
 
 func (m *postgresDBRepo) UpdateUserProfile(u models.User) map[string]string {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-
-	defer cancel()
 	var results = make(map[string]string)
 
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var fname, lname, email, phone, uname, iurl, updatedAt, createdAt string
+	var memberId, craftId int
+
 	query := `
-		update users set first_name = $1, last_name =$2, email = $3, phone = $4, updated_at = $5
+		update members m set first_name = $1, last_name = $2, email = $3, phone = $4, updated_at = $5 where m.email = $6 returning m.id, m.first_name, m.last_name, m.email, m.phone, m.craft_id, updated_at, created_at
 	`
 
-	result, err := m.DB.ExecContext(ctx, query,
+	rows, err := m.DB.QueryContext(ctx, query,
 		u.FirstName,
 		u.LastName,
 		u.Email,
 		u.Phone,
 		time.Now(),
+		u.Email,
 	)
 
 	if err != nil {
-		results["err"] = "Update query failed"
+		fmt.Printf("\tQuery Error: %s\n", err.Error())
+		results["err"] = err.Error()
 		return results
 	}
 
-	results["err"] = ""
+	for rows.Next() {
+		if err := rows.Scan(&memberId, &fname, &lname, &email, &phone, &craftId, &updatedAt, &createdAt); err != nil {
+			fmt.Printf("\tRow Scan Error: %s\n", err.Error())
+			results["err"] = err.Error()
+			return results
+		}
 
-	rows, err := result.RowsAffected()
+		/* fmt.Printf("Member ID:\t%d\n", memberId)
+		fmt.Printf("First Name:\t%s\n", fname)
+		fmt.Printf("Last Name:\t%s\n", lname)
+		fmt.Printf("Email:\t%s\n", email)
+		fmt.Printf("Phone:\t%s\n", phone)
+		fmt.Printf("Craft ID:\t%d\n", craftId)
+		fmt.Printf("Updated At:\t%v\n", updatedAt) */
+	}
+
+	rerr := rows.Close()
+
+	if rerr != nil {
+		fmt.Printf("rerr error:\t%s\n", rerr.Error())
+		results["err"] = rerr.Error()
+		return results
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Printf("Row Error:\t%s\n", err.Error())
+		results["err"] = err.Error()
+		return results
+	}
+
+	results["userID"] = fmt.Sprintf("%d", memberId)
+	results["firstName"] = fname
+	results["lastName"] = lname
+	results["email"] = email
+	results["phone"] = phone
+	results["craftID"] = fmt.Sprintf("%d", craftId)
+	results["createdAt"] = fmt.Sprintf("%v", createdAt)
+	results["updatedAt"] = fmt.Sprintf("%v", updatedAt)
+
+	// ------------------------------------------------------------------------
+
+	query = `
+		update profiles p set user_name = $1, image_url = $2 where p.member_id = $3 returning p.user_name, p.image_url
+	`
+
+	rows, err = m.DB.QueryContext(ctx, query,
+		u.Username,
+		u.ImageURL,
+		memberId,
+	)
 
 	if err != nil {
-		results["userUpdateErr"] = "User update failed"
+		results["err"] = err.Error()
+		return results
 	}
 
-	var userStatus string
+	for rows.Next() {
+		if err := rows.Scan(&uname, &iurl); err != nil {
+			fmt.Printf("\t2nd Row Scan Error: %s\n", err.Error())
+			results["err"] = err.Error()
+			return results
+		}
 
-	if rows == 1 {
-		userStatus = "success"
-	} else {
-		userStatus = "failed"
+		// fmt.Printf("User Name:\t%s\n", uname)
+		// fmt.Printf("Image URL:\t%s\n", iurl)
 	}
 
-	results["userStatus"] = userStatus
+	rerr = rows.Close()
 
-	// query = `
-	// update profiles set user_name = $1, image_url = $2 where profile_id = $3`
+	if rerr != nil {
+		fmt.Printf("2nd rerr error:\t%s\n", rerr.Error())
+		results["err"] = rerr.Error()
+		return results
+	}
 
+	if err := rows.Err(); err != nil {
+		fmt.Printf("2nd Row Error:\t%s\n", err.Error())
+		results["err"] = err.Error()
+		return results
+	}
+
+	results["userName"] = uname
+	results["imageUrl"] = iurl
+	results["err"] = ""
 	return results
 
 }
@@ -231,27 +280,21 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 
 	var results = make(map[string]string)
 	// var userId, accessLevel int
-	var accessLevel, id int
+	var accessLevel, id, craftId int
 	var firstName, lastName, emailAddress, phone, hashedPassword, userName, imgUrl string
 	var createdAt, updatedAt time.Time
 
-	/* row := m.DB.QueryRowContext(ctx, "select id, first_name, last_name, email, phone, access_level, created_at, updated_at, password from members where email = $1", email)
+	row := m.DB.QueryRowContext(ctx, "select first_name, last_name, email, phone, access_level, craft_id, created_at, updated_at, password, user_name, image_url from members m left join profiles p on p.member_id = p.member_id where p.member_id = m.id and email = $1", email)
 
-	err := row.Scan(&userId, &firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword) */
-
-	/* row := m.DB.QueryRowContext(ctx, "select first_name, last_name, email, phone, access_level, created_at, updated_at, password, user_name, image_url from members m left join profiles p ON p.member_id = p.member_id  where p.member_id = m.id and email = $1", email) */
-
-	row := m.DB.QueryRowContext(ctx, "select first_name, last_name, email, phone, access_level, created_at, updated_at, password, user_name, image_url from members m left join profiles p on p.member_id = p.member_id where p.member_id = m.id and email = $1", email)
-
-	err := row.Scan(&firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword, &userName, &imgUrl)
+	err := row.Scan(&firstName, &lastName, &emailAddress, &phone, &accessLevel, &craftId, &createdAt, &updatedAt, &hashedPassword, &userName, &imgUrl)
 
 	if err != nil {
 		log.Printf("\n\tScan error:\n\t%s\n", err.Error())
 		log.Printf("\n\tRunning query for members only\n\n")
 
-		row = m.DB.QueryRowContext(ctx, "select id, first_name, last_name, email, phone, access_level, created_at, updated_at, password from members where email = $1", email)
+		row = m.DB.QueryRowContext(ctx, "select id, first_name, last_name, email, phone, access_level,craft_id, created_at, updated_at, password from members where email = $1", email)
 
-		err = row.Scan(&id, &firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword)
+		err = row.Scan(&id, &firstName, &lastName, &emailAddress, &phone, &accessLevel, &craftId, &createdAt, &updatedAt, &hashedPassword)
 
 		if err != nil {
 			log.Printf("\n\tScan error:\n\t%s\n\n", err.Error())
@@ -263,7 +306,7 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 
 		if err == bcrypt.ErrMismatchedHashAndPassword {
 			log.Println("Authentication failed")
-			results["err"] = ""
+			results["err"] = err.Error()
 			return results
 		} else if err != nil {
 			log.Printf("\nError:\n\t%s\n\n", err.Error())
@@ -277,6 +320,7 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 		results["email"] = email
 		results["phone"] = phone
 		results["accessLevel"] = fmt.Sprintf("%d", accessLevel)
+		results["craftID"] = fmt.Sprintf("%d", craftId)
 		results["createdAt"] = createdAt.String()
 		results["updatedAt"] = updatedAt.String()
 		results["err"] = ""
@@ -302,6 +346,7 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 	results["email"] = email
 	results["phone"] = phone
 	results["accessLevel"] = fmt.Sprintf("%d", accessLevel)
+	results["craftID"] = fmt.Sprintf("%d", craftId)
 	results["createdAt"] = createdAt.String()
 	results["updatedAt"] = updatedAt.String()
 	results["userName"] = userName

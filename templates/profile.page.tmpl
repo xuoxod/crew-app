@@ -51,21 +51,21 @@ Profile
                             <div class="mb-3">
                                 <label for="uname" class="form-label w3-left">
                                     <strong>
-                                        Username
+                                        User Name
                                         {{with .Form.Errors.Get "uname"}}
                                         <label for="" class="text-danger">{{.}}</label>
                                         {{end}}
                                     </strong>
                                 </label>
                                 <input type="text" class="form-control {{with .Form.Errors.Get "uname"}} is-invalid
-                                    {{end}}" name="uname" placeholder="Create a username" autocomplete="off"
-                                    aria-label="Username" aria-describedby="addon-wrapping">
+                                    {{end}}" name="uname" placeholder="Enter your picture URL" autocomplete="off"
+                                    aria-label="Image URL" aria-describedby="addon-wrapping">
                             </div>
                             {{else}}
                             <div class="mb-3">
                                 <label for="uname" class="form-label w3-left">
                                     <strong>
-                                        Username
+                                        User Name
                                         {{with .Form.Errors.Get "uname"}}
                                         <label for="" class="text-danger">{{.}}</label>
                                         {{end}}
@@ -76,6 +76,7 @@ Profile
                                     aria-label="Image URL" aria-describedby="addon-wrapping" value="{{$user.Username}}">
                             </div>
                             {{end}}
+
 
                             <div class="mb-3">
                                 <label for="email" class="form-label w3-left">
@@ -141,7 +142,7 @@ Profile
                                         Creation Date
                                     </strong>
                                 </label>
-                                <input type="date" class="form-control" readonly name="createdat" autocomplete="off"
+                                <input type="text" class="form-control" readonly name="createdat" autocomplete="off"
                                     aria-label="Creation Date" aria-describedby="addon-wrapping" value="{{$user.CreationDate}}">
                             </div>
 
@@ -151,11 +152,11 @@ Profile
                                         Last Updated
                                     </strong>
                                 </label>
-                                <input type="date" class="form-control" readonly name="updatedat" autocomplete="off" aria-label="Update Date" aria-describedby="addon-wrapping" value="{{$user.Updated}}">
+                                <input type="text" class="form-control" readonly name="updatedat" autocomplete="off" aria-label="Update Date" aria-describedby="addon-wrapping" value="{{$user.Updated}}">
                             </div>                                 
 
                             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                             {{if (eq $user.ImageURL "no")}}
+                             {{if (eq $user.HasID "yes")}}
                             <input type="hidden" name="user_id" value="{{$user.ID}}">
                             {{end}}
                             <div class="input-group flex-nowrap w3-margin-top">

@@ -37,7 +37,8 @@ func routes(app *config.AppConfig) http.Handler {
 		mux.Get("/dashboard", handlers.Repo.Dashboard)
 		mux.Get("/settings", handlers.Repo.SettingsPage)
 		mux.Get("/profile", handlers.Repo.ProfilePage)
-		mux.Post("/profile/update", handlers.Repo.UpdateUserProfile)
+		mux.Post("/profile/update", handlers.Repo.UpdateTheUserProfile)
+		mux.Post("/profile/create", handlers.Repo.CreateUserProfile)
 		mux.Get("/signout", handlers.Repo.SignOut)
 	})
 

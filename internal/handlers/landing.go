@@ -633,6 +633,7 @@ func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
 	// form.Required("email", "fname", "lname", "uname", "phone", "imgurl")
 
 	if !form.Valid() {
+		fmt.Printf("\n\tForm Error:\t%v\n\n", form.Errors)
 		loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
 
 		if !ok {
@@ -680,14 +681,14 @@ func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Email: ", results["email"])
 	fmt.Println("Phone: ", results["phone"])
 	fmt.Println("Craft ID: ", results["craftID"])
+	fmt.Println("User Name: ", results["userName"])
+	fmt.Println("Image URL: ", results["imageUrl"])
 	fmt.Println("Created: ", results["createdAt"])
 	fmt.Println("Updated: ", results["updatedAt"])
 	fmt.Printf("\n\n")
 
 	// Add the update user data to the session
 	m.App.Session.Put(r.Context(), "loggedin", loggedIn)
-
-	fmt.Printf("\n\n\t\tCreate User Profile Data\n\t\t\t%v\n\n", results)
 
 	http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
 }

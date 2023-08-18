@@ -131,7 +131,7 @@ func (m *postgresDBRepo) CreateUserProfile(u models.User) map[string]string {
 	var memberId, craftId int
 
 	query := `
-		update members m set first_name = $1, last_name = $2, email = $3, phone = $4, updated_at = $5 where m.id = $6 returning m.id, m.first_name, m.last_name, m.email, m.phone, m.craft_id, updated_at, created_at
+		update members m set first_name = $1, last_name = $2, email = $3, phone = $4, updated_at = $5 where m.email = $6 returning m.id, m.first_name, m.last_name, m.email, m.phone, m.craft_id, updated_at, created_at
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query,
@@ -140,7 +140,7 @@ func (m *postgresDBRepo) CreateUserProfile(u models.User) map[string]string {
 		u.Email,
 		u.Phone,
 		time.Now(),
-		u.ID,
+		u.Email,
 	)
 
 	if err != nil {
@@ -183,13 +183,13 @@ func (m *postgresDBRepo) CreateUserProfile(u models.User) map[string]string {
 	// ------------------------------------------------------------------------
 
 	query = `
-		update profiles p set user_name = $1, image_url = $2 where p.member_id = $3 returning p.user_name, p.image_url
+		insert into profiles (user_name, image_url, member_id) values($1,$2,$3) returning user_name, image_url
 	`
 
 	rows, err = m.DB.QueryContext(ctx, query,
 		u.Username,
 		u.ImageURL,
-		memberId,
+		u.ID,
 	)
 
 	if err != nil {

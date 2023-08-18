@@ -328,7 +328,6 @@ func (m *postgresDBRepo) UpdateUserProfile(u models.User) map[string]string {
 	results["imageUrl"] = iurl
 	results["err"] = ""
 	return results
-
 }
 
 func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, error) {

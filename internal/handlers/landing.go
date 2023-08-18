@@ -598,6 +598,9 @@ func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request
 // @route       POST /signin
 // @access      private
 func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
+	// Remove the old user data from the session
+	m.App.Session.Remove(r.Context(), "loggedin")
+
 	err := r.ParseForm()
 
 	if err != nil {
@@ -649,6 +652,40 @@ func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := m.DB.CreateUserProfile(updatedUser)
+	userId, _ := strconv.Atoi(results["userID"])
+	craftId, _ := strconv.Atoi(results["craftID"])
+
+	/* 	const layout = "2006-01-02"
+	   	creationDate, _ := time.Parse(layout, results["createdAt"])
+	   	updatedDate, _ := time.Parse(layout, results["updatedAt"]) */
+
+	loggedIn := models.User{
+		FirstName:    results["firstName"],
+		LastName:     results["lastName"],
+		ID:           userId,
+		Email:        results["email"],
+		Phone:        results["phone"],
+		CraftID:      craftId,
+		Username:     results["userName"],
+		ImageURL:     results["imageUrl"],
+		CreationDate: results["createdAt"],
+		Updated:      results["updatedAt"],
+		HasID:        "yes",
+	}
+
+	fmt.Println("\tCreate User Profile Data")
+	fmt.Println("User ID: ", results["userID"])
+	fmt.Println("First Name: ", results["firstName"])
+	fmt.Println("Last Name: ", results["lastName"])
+	fmt.Println("Email: ", results["email"])
+	fmt.Println("Phone: ", results["phone"])
+	fmt.Println("Craft ID: ", results["craftID"])
+	fmt.Println("Created: ", results["createdAt"])
+	fmt.Println("Updated: ", results["updatedAt"])
+	fmt.Printf("\n\n")
+
+	// Add the update user data to the session
+	m.App.Session.Put(r.Context(), "loggedin", loggedIn)
 
 	fmt.Printf("\n\n\t\tCreate User Profile Data\n\t\t\t%v\n\n", results)
 

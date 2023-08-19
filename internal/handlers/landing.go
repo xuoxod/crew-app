@@ -222,7 +222,7 @@ func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // @desc        Signin user
-// @route       POST /signin
+// @route       POST /login
 // @access      Public
 func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.RenewToken(r.Context())
@@ -329,6 +329,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 		m.App.Session.Put(r.Context(), "loggedin", loggedIn)
 
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+
 	case "hasprofile":
 		fmt.Printf("User is authenticated with a profile\n\tFirst Name:\t%s\n\tLast Name:\t%s\n\tEmail:\t%s\n\tPhone:\t%s\n\tCreated At:\t%v\n\tUpdated At:\t%v\n\tUsername:\t%v\n\tImage URL:\t%v\n\n", firstName, lastName, emailAddress, phone, createdAt, updatedAt, userName, imgUrl)
 
@@ -353,12 +354,11 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 		m.App.Session.Put(r.Context(), "loggedin", loggedIn)
 
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-
 	}
 }
 
 // @desc        Signout user
-// @route       GET /signin
+// @route       GET /signout
 // @access      Private
 func (m *Repository) SignOut(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.Destroy(r.Context())
@@ -368,7 +368,7 @@ func (m *Repository) SignOut(w http.ResponseWriter, r *http.Request) {
 }
 
 // @desc        Logout user
-// @route       GET /signin
+// @route       GET /logout
 // @access      Private
 func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.Destroy(r.Context())

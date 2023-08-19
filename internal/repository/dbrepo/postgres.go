@@ -361,7 +361,6 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 	defer cancel()
 
 	var results = make(map[string]string)
-	// var userId, accessLevel int
 	var accessLevel, id, craftId int
 	var firstName, lastName, emailAddress, phone, hashedPassword, userName, imgUrl string
 	var createdAt, updatedAt time.Time
@@ -422,7 +421,6 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 		return results
 	}
 
-	// results["userID"] = fmt.Sprintf("%d", userId)
 	results["firstName"] = firstName
 	results["lastName"] = lastName
 	results["email"] = email

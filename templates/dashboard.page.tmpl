@@ -4,20 +4,7 @@ Dashboard
 {{end}}
 
 {{define "content"}}
-<div class="d-flex justify-content-between align-items-center">
-  <div>
-    <div>
-      {{$user := index .Data "loggedin"}}
-      <h4 class="font-weight-bold mb-0">{{$user.FirstName}} {{$user.LastName}}</h4>
-    </div>
-  </div>
-  <div>
-    <button type="button" class="btn btn-primary btn-icon-text btn-rounded m-4">
-      <i class="ti-clipboard btn-icon-prepend"></i>Report
-    </button>
-  </div>
-</div>
-
+{{$user := index .Data "loggedin"}}
 <div class="row">
   <div class="col-md-3 grid-margin stretch-card">
     <div class="card">
@@ -28,7 +15,7 @@ Dashboard
           <h3 class="mb-0 mb-md-2 mb-xl-0 order-md-1 order-xl-0">Info</h3>
 
           <div class="d-grid justify-content align-items-center">
-            <img class="icon-md text-muted mb-2 mb-md-2 bm-xl-2" src="{{$user.ImageURL}}" style="width:80%;height:70%;">
+            <img class="icon-md text-muted mb-0 mb-md-3 mb-xl-0" src="{{$user.ImageURL}}" style="width:80%;height:70%;">
             <a class="link" style="text-decoration:none;" href="/user/profile">Edit</a>
           </div>
 
@@ -49,7 +36,7 @@ Dashboard
   <div class="col-md-3 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <p class="card-title text-md-center text-xl-left">Chat</p>
+        <p class="card-title text-md-center text-xl-left">Run</p>
         <div
           class="d-flex flex-wrap justify-content-between justify-content-md-center justify-content-xl-between align-items-center">
           <h3 class="mb-0 mb-md-2 mb-xl-0 order-md-1 order-xl-0">47033</h3>
@@ -64,7 +51,7 @@ Dashboard
   <div class="col-md-3 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <p class="card-title text-md-center text-xl-left">Favorites</p>
+        <p class="card-title text-md-center text-xl-left">Messages</p>
         <div
           class="d-flex flex-wrap justify-content-between justify-content-md-center justify-content-xl-between align-items-center">
           <h3 class="mb-0 mb-md-2 mb-xl-0 order-md-1 order-xl-0">40016</h3>

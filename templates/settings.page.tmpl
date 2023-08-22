@@ -11,10 +11,124 @@ Settings
                 <div class="w3-container w3-margin">
                     <div class="w3-container w3-row">
                         {{$user := index .Data "loggedin"}}
+                        {{$setting := index .Data "settings"}}
+                        {{$formComps := index .Data "formComps"}}
 
+                        <form action="/user/settings/update" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" name="member_id" value="{{$user.ID}}">
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" {{ if $setting.ShowProfile}}
+                                        checked {{end}} name="show_profile" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" id="show_profile" class="form-control"
+                                    aria-label="Text input with checkbox">
+                            </div>
+
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" name="show_online_status"
+                                        value="" aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" name="show_address" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                            <div class="input-group input-group-lg mb-4">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="checkbox" value=""
+                                        aria-label="Checkbox for following text input">
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox">
+                            </div>
+
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-{{end}}
+    {{end}}

@@ -463,21 +463,31 @@ func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 // @route       GET /user/settings
 // @access      Private
 func (m *Repository) SettingsPage(w http.ResponseWriter, r *http.Request) {
-	var emptyUserForm models.Member
-	data := make(map[string]interface{})
-	data["setting"] = emptyUserForm
+	var emptyUserSettingsForm models.UserSettings
 
-	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
+	loggedin, loggedinOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
+	settings, settingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
 
-	if !ok {
-		log.Println("Cannot get item from session")
-		m.App.ErrorLog.Println("Can't get error from the session")
+	if !loggedinOk {
+		log.Println("Cannot get loggedin from session")
+		m.App.ErrorLog.Println("Can't get loggedin from the session")
 		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
+	if !settingsOk {
+		log.Println("Cannot get user_settings from session")
+		m.App.ErrorLog.Println("Can't get user_settings from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get user_settings from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["settingsform"] = emptyUserSettingsForm
 	data["loggedin"] = loggedin
+	data["settings"] = settings
 
 	_ = render.Template(w, r, "settings.page.tmpl", &models.TemplateData{Data: data, Form: forms.New(nil)})
 }

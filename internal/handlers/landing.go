@@ -136,7 +136,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 
 	// $2a$12$wPXDZd9LKDchbmN3cUn9K.Jqr73IfVqpx9XabDcGq5H0/8dMwqnYW
 
-	newUser := models.Member{
+	newUserData := models.Member{
 		FirstName: r.Form.Get("fname"),
 		LastName:  r.Form.Get("lname"),
 		Email:     r.Form.Get("email"),
@@ -144,27 +144,54 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		Password:  r.Form.Get("pwd1"),
 	}
 
-	newUserID, err := m.DB.CreateUser(newUser)
+	createdUser, err := m.DB.CreateUser(newUserData)
 
 	if err != nil {
-		errMsg := strings.TrimSpace(strings.Split(err.Error(), ":")[1])
-		fmt.Printf("\n\t\tError creating new user:\t%s\n\n", errMsg)
-		m.App.Session.Put(r.Context(), "error", errMsg)
+		fmt.Printf("\n\t\tError creating new user:\t%s\n\n", err.Error())
+		m.App.Session.Put(r.Context(), "error", "Error registering user")
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
 
-	fmt.Printf("\tNew user ID: %v\n", newUserID)
-
-	if err != nil {
+	/* 	if err != nil {
 		fmt.Printf("\n\tAnother Error Occurred\n\t%v\n\n", err.Error())
 		helpers.ServerError(w, err)
 		return
-	}
+	} */
+
+	id, _ := strconv.Atoi(createdUser["ID"])
+
+	fmt.Println("\tUser Registered")
+	fmt.Println("        ID:\t", id)
+	fmt.Println("First Name:\t", createdUser["firstName"])
+	fmt.Println(" Last Name:\t", createdUser["lastName"])
+	fmt.Println("     Email:\t", createdUser["email"])
+	fmt.Println("     Phone:\t", createdUser["phone"])
 
 	m.App.Session.Put(r.Context(), "registration", registration)
 
 	http.Redirect(w, r, "/registrationsummary", http.StatusSeeOther)
+}
+
+// @desc        Registration summary
+// @route       GET /registrationsummary
+// @access      Public
+func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request) {
+	registration, ok := m.App.Session.Get(r.Context(), "registration").(models.Registration)
+
+	if !ok {
+		log.Println("Cannot get registration data from session")
+		m.App.ErrorLog.Println("Can't get registration data from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get registration data from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	m.App.Session.Remove(r.Context(), "registration")
+	data := make(map[string]interface{})
+	data["registration"] = registration
+
+	_ = render.Template(w, r, "registrationsummary.page.tmpl", &models.TemplateData{Data: data})
 }
 
 // @desc        Login user
@@ -402,27 +429,6 @@ func (m *Repository) DummyHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(out)
 }
 
-// @desc        Registration summary
-// @route       GET /registrationsummary
-// @access      Public
-func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request) {
-	registration, ok := m.App.Session.Get(r.Context(), "registration").(models.Registration)
-
-	if !ok {
-		log.Println("Cannot get item from session")
-		m.App.ErrorLog.Println("Can't get error from the session")
-		m.App.Session.Put(r.Context(), "error", "Can't get registration from session")
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
-	}
-
-	m.App.Session.Remove(r.Context(), "registration")
-	data := make(map[string]interface{})
-	data["registration"] = registration
-
-	_ = render.Template(w, r, "registrationsummary.page.tmpl", &models.TemplateData{Data: data})
-}
-
 // @desc        Dashboard Page
 // @route       GET /user/dashboard
 // @access      Private
@@ -450,9 +456,6 @@ func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("loggedin:\t", loggedin)
-	fmt.Println("profile:\t", profile)
-
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 
@@ -464,6 +467,8 @@ func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 // @access      Private
 func (m *Repository) SettingsPage(w http.ResponseWriter, r *http.Request) {
 	var emptyUserSettingsForm models.UserSettings
+
+	fmt.Println("Get Settings Page")
 
 	loggedin, loggedinOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	settings, settingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
@@ -490,6 +495,129 @@ func (m *Repository) SettingsPage(w http.ResponseWriter, r *http.Request) {
 	data["settings"] = settings
 
 	_ = render.Template(w, r, "settings.page.tmpl", &models.TemplateData{Data: data, Form: forms.New(nil)})
+}
+
+// @desc        Update user settings
+// @route       POST /user/settings
+// @access      Private
+func (m *Repository) PostSettingsPage(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	var showProfile, showOnlineStatus, showAddress, showCity, showState, showDisplayName, showContactInfo, showPhone, showEmail, showCraft, showRun, showNotifications bool
+
+	id, _ := strconv.Atoi(r.Form.Get("member_id"))
+
+	fmt.Println("Show Profile:\t", r.PostForm.Get("show_profile"))
+
+	if r.Form.Get("show_profile") == "" {
+		showProfile = false
+	} else {
+		showProfile = true
+	}
+
+	if r.Form.Get("show_online_status") == "" {
+		showOnlineStatus = false
+	} else {
+		showOnlineStatus = true
+	}
+
+	if r.Form.Get("show_address") == "" {
+		showAddress = false
+	} else {
+		showAddress = true
+	}
+
+	if r.Form.Get("show_city") == "" {
+		showCity = false
+	} else {
+		showCity = true
+	}
+
+	if r.Form.Get("show_state") == "" {
+		showState = false
+	} else {
+		showState = true
+	}
+
+	if r.Form.Get("show_display_name") == "" {
+		showDisplayName = false
+	} else {
+		showDisplayName = true
+	}
+
+	if r.Form.Get("show_contact_info") == "" {
+		showContactInfo = false
+	} else {
+		showContactInfo = true
+	}
+
+	if r.Form.Get("show_phone") == "" {
+		showPhone = false
+	} else {
+		showPhone = true
+	}
+
+	if r.Form.Get("show_email") == "" {
+		showEmail = false
+	} else {
+		showEmail = true
+	}
+
+	if r.Form.Get("show_craft") == "" {
+		showCraft = false
+	} else {
+		showCraft = true
+	}
+
+	if r.Form.Get("show_run") == "" {
+		showRun = false
+	} else {
+		showRun = true
+	}
+
+	if r.Form.Get("show_notif") == "" {
+		showNotifications = false
+	} else {
+		showNotifications = true
+	}
+
+	fmt.Printf("\n\n\n")
+	fmt.Println("ShowProfile?\t", r.FormValue("show_profile"))
+	fmt.Println("ShowOnlineStatus?\t", r.FormValue("show_online_status"))
+	fmt.Println("ShowAddress?\t", r.FormValue("show_address"))
+	fmt.Println("ShowCity?\t", r.FormValue("show_city"))
+	fmt.Println("ShowState?\t", r.FormValue("show_state"))
+	fmt.Println("ShowDisplayName?\t", r.FormValue("show_display_name"))
+	fmt.Println("ShowContactInfo?\t", r.FormValue("show_contact_info"))
+	fmt.Println("ShowPhone?\t", r.FormValue("show_phone"))
+	fmt.Println("ShowEmail?\t", r.FormValue("show_email"))
+	fmt.Println("ShowCraft?\t", r.FormValue("show_craft"))
+	fmt.Println("ShowRun?\t", r.FormValue("show_run"))
+	fmt.Println("ShowNotifications?\t", r.FormValue("show_notif"))
+
+	userSettings := models.UserSettings{
+		MemberID:          id,
+		ShowProfile:       showProfile,
+		ShowOnlineStatus:  showOnlineStatus,
+		ShowAddress:       showAddress,
+		ShowCity:          showCity,
+		ShowState:         showState,
+		ShowDisplayName:   showDisplayName,
+		ShowContactInfo:   showContactInfo,
+		ShowPhone:         showPhone,
+		ShowEmail:         showEmail,
+		ShowCraft:         showCraft,
+		ShowRun:           showRun,
+		ShowNotifications: showNotifications,
+	}
+
+	fmt.Println(userSettings)
+	http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
 }
 
 // @desc        User Profile Page
@@ -521,9 +649,6 @@ func (m *Repository) ProfilePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("loggedin:\t", loggedin)
-	fmt.Println("profile:\t", profile)
-
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 
@@ -540,6 +665,8 @@ func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request
 	// Remove the old user data from the session
 	m.App.Session.Remove(r.Context(), "loggedin")
 	m.App.Session.Remove(r.Context(), "user_profile")
+
+	fmt.Println("Post to the UpdateTheUserProfile Route")
 
 	err := r.ParseForm()
 

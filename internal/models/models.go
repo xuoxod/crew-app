@@ -63,6 +63,11 @@ type UserSettings struct {
 	ShowNotifications bool
 }
 
+// User ID
+type UserID struct {
+	UserID int
+}
+
 // Crew member data
 type Crew struct {
 	RunNumber int

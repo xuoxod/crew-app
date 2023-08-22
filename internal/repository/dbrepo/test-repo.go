@@ -6,8 +6,9 @@ func (m *testDBRepo) AllUsers() bool {
 	return true
 }
 
-func (m *testDBRepo) CreateUser(res models.Member) (int, error) {
-	return 0, nil
+func (m *testDBRepo) CreateUser(res models.Member) (map[string]string, error) {
+	results := make(map[string]string)
+	return results, nil
 }
 
 // User stuff
@@ -30,6 +31,13 @@ func (m *testDBRepo) AuthenticateUser(email, testPassword string) map[string]str
 }
 
 func (m *testDBRepo) UpdateUserProfile(u models.Member, p models.Profile) map[string]string {
+
+	results := make(map[string]string)
+
+	return results
+}
+
+func (m *testDBRepo) UpdateUserSettings(u models.UserSettings) map[string]string {
 
 	results := make(map[string]string)
 

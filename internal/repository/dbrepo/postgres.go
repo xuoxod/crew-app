@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/xuoxod/crew-app/internal/helpers"
 	"github.com/xuoxod/crew-app/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,31 +15,84 @@ func (m *postgresDBRepo) AllUsers() bool {
 	return true
 }
 
-func (m *postgresDBRepo) CreateUser(res models.Member) (int, error) {
+func (m *postgresDBRepo) CreateUser(res models.Member) (map[string]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	var results = make(map[string]string)
 
 	defer cancel()
 
-	var newID int
+	var newID, memberID int
+	var fname, lname, email, phone string
 
+	// Create new record in members table
 	stmt := `insert into krxbyhhs.public.members(first_name, last_name, email, phone, password, created_at, updated_at)
-	values($1,$2,$3,$4,$5,$6,$7) returning id`
+	values($1,$2,$3,$4,$5,$6,$7) returning id, first_name, last_name, email, phone`
 
-	err := m.DB.QueryRowContext(ctx, stmt,
+	hashedPassword, hashPasswordErr := helpers.HashPassword(res.Password)
+
+	if hashPasswordErr != nil {
+		fmt.Println("Error hashing password: ", hashPasswordErr.Error())
+		return nil, hashPasswordErr
+	}
+
+	row := m.DB.QueryRowContext(ctx, stmt,
 		res.FirstName,
 		res.LastName,
 		res.Email,
 		res.Phone,
-		res.Password,
+		hashedPassword,
 		time.Now(),
 		time.Now(),
-	).Scan(&newID)
+	)
 
-	if err != nil {
-		return 0, err
+	memberErr := row.Scan(&newID, &fname, &lname, &email, &phone)
+
+	if memberErr != nil {
+		fmt.Println("memberErr: ", memberErr.Error())
+		return nil, memberErr
 	}
 
-	return newID, nil
+	// Create new record in profiles table
+	stmt = `
+	insert into krxbyhhs.public.profiles(member_id, user_name, image_url, craft, display_name, updated_at, years_of_service)
+	values($1, $2, $3, $4, $5, $6, $7) returning member_id`
+
+	row = m.DB.QueryRowContext(ctx, stmt,
+		newID,
+		email,
+		"https://via.placeholder.com/150/659403",
+		"crew",
+		email,
+		time.Now(),
+		0,
+	)
+
+	profileErr := row.Scan(&memberID)
+
+	if profileErr != nil {
+		fmt.Println("profileErr: ", profileErr.Error())
+		return nil, profileErr
+	}
+
+	// Create new record in user_settings table
+	stmt = `insert into krxbyhhs.public.user_settings(member_id) values($1) returning member_id`
+
+	row = m.DB.QueryRowContext(ctx, stmt, newID)
+
+	userSettingsErr := row.Scan(&memberID)
+
+	if userSettingsErr != nil {
+		fmt.Println("userSettingsErr: ", userSettingsErr.Error())
+		return nil, userSettingsErr
+	}
+
+	results["ID"] = fmt.Sprintf("%d", newID)
+	results["firstName"] = fname
+	results["lastName"] = lname
+	results["email"] = email
+	results["phone"] = phone
+
+	return results, nil
 }
 
 // User stuff
@@ -219,39 +273,63 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 	defer cancel()
 
 	var results = make(map[string]string)
-	var accessLevel, id, yos int
+	var accessLevel, id, yos, memberId int
 	var firstName, lastName, emailAddress, phone, hashedPassword, userName, imgUrl, craft, address, city, state, displayName string
 	var createdAt, updatedAt time.Time
 	var showProfile, showOnlineStatus, showAddress, showCity, showState, showDisplayName, showContactInfo, showPhone, showEmail, showCraft, showRun, showNotifications bool
 
 	query := `select m.first_name, m.last_name, m.email, m.phone, m.access_level, m.created_at, m.updated_at, m.password, 
-	p.user_name, p.image_url, p.craft, p.years_of_service, p.address, p.city, p.state, p.display_name, 
+	p.user_name, p.image_url, p.craft, p.years_of_service, p.address, p.city, p.state, p.display_name, p.member_id, 
 	us.show_profile, us.show_online_status, us.show_address, us.show_city, us.show_state, us.show_display_name, us.show_contact_info, us.show_phone, us.show_email, us.show_craft, us.show_run, us.show_notifications, us.member_id from members m 
 	inner join profiles p on p.member_id = m.id inner join user_settings us on us.member_id = m.id where email = $1`
 
 	row := m.DB.QueryRowContext(ctx, query, email)
 
-	err := row.Scan(&firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword, &userName, &imgUrl, &craft, &yos, &address, &city, &state, &displayName, &showProfile, &showOnlineStatus, &showAddress, &showCity, &showState, &showDisplayName, &showContactInfo, &showPhone, &showEmail, &showCraft, &showRun, &showNotifications, &id)
+	err := row.Scan(&firstName, &lastName, &emailAddress, &phone, &accessLevel, &createdAt, &updatedAt, &hashedPassword, &userName, &imgUrl, &craft, &yos, &address, &city, &state, &displayName, &memberId, &showProfile, &showOnlineStatus, &showAddress, &showCity, &showState, &showDisplayName, &showContactInfo, &showPhone, &showEmail, &showCraft, &showRun, &showNotifications, &id)
 
 	if err != nil {
 		log.Printf("\n\tScan error:\n\t%s\n", err.Error())
-		results["err"] = err.Error()
-		return results
+		results["scanerr"] = err.Error()
+		// return results
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(testPassword))
 
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		log.Println("Authentication failed")
+		log.Println("bcrypt error:\t", err.Error())
 		results["err"] = err.Error()
 		return results
 	} else if err != nil {
-		log.Printf("\nError:\n\t%s\n\n", err.Error())
+		log.Println("bcrypt error:\t", err.Error())
 		results["err"] = err.Error()
 		return results
 	}
 
-	results["userID"] = fmt.Sprintf("%d", id)
+	if userName == "" {
+		userName = "Create username"
+	}
+
+	if imgUrl == "" {
+		imgUrl = "Upload photo"
+	}
+
+	if address == "" {
+		address = "Enter street address"
+	}
+
+	if city == "" {
+		city = "Enter home town"
+	}
+
+	if state == "" {
+		state = "Enter state"
+	}
+
+	if displayName == "" {
+		displayName = "Create display name"
+	}
+
+	results["userID"] = fmt.Sprintf("%d", memberId)
 	results["firstName"] = firstName
 	results["lastName"] = lastName
 	results["email"] = email
@@ -280,5 +358,12 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 	results["showRun"] = fmt.Sprintf("%t", showRun)
 	results["showNotifications"] = fmt.Sprintf("%t", showNotifications)
 	results["err"] = ""
+	return results
+}
+
+func (m *postgresDBRepo) UpdateUserSettings(p models.UserSettings) map[string]string {
+
+	results := make(map[string]string)
+
 	return results
 }

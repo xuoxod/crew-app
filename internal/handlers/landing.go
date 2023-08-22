@@ -653,6 +653,7 @@ func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request
 		CreationDate: createdAt,
 		CreatedAt:    _createdAt,
 		UpdatedAt:    updatedDate,
+		Updated:      profileUpdatedAt,
 	}
 
 	profile := models.Profile{

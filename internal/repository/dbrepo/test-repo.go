@@ -6,31 +6,21 @@ func (m *testDBRepo) AllUsers() bool {
 	return true
 }
 
-func (m *testDBRepo) CreateUser(res models.User) (int, error) {
-	return 0, nil
-}
-
-func (m *testDBRepo) InsertCraft(r models.Craft) (int, error) {
+func (m *testDBRepo) CreateUser(res models.Member) (int, error) {
 	return 0, nil
 }
 
 // User stuff
 
-func (m *testDBRepo) GetUserByID(id int) (models.User, error) {
-	var u models.User
+func (m *testDBRepo) GetUserByID(id int) (models.Member, error) {
+	var u models.Member
 	return u, nil
 }
 
-func (m *testDBRepo) GetUserByEmail(email string) (models.User, error) {
-	var u models.User
+func (m *testDBRepo) GetUserByEmail(email string) (models.Member, error) {
+	var u models.Member
 
 	return u, nil
-}
-
-func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
-	var id int
-	var hashedPassword string
-	return id, hashedPassword, nil
 }
 
 func (m *testDBRepo) AuthenticateUser(email, testPassword string) map[string]string {
@@ -39,14 +29,9 @@ func (m *testDBRepo) AuthenticateUser(email, testPassword string) map[string]str
 	return results
 }
 
-func (m *testDBRepo) UpdateUserProfile(u models.User) map[string]string {
+func (m *testDBRepo) UpdateUserProfile(u models.Member, p models.Profile) map[string]string {
 
 	results := make(map[string]string)
 
-	return results
-}
-
-func (m *testDBRepo) CreateUserProfile(u models.User) map[string]string {
-	results := make(map[string]string)
 	return results
 }

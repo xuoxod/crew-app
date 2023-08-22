@@ -62,8 +62,9 @@ func run() (*driver.DB, error) {
 
 	// Store a value in session
 	gob.Register(models.Registration{})
-	gob.Register(models.User{})
-	gob.Register(models.Craft{})
+	gob.Register(models.Member{})
+	gob.Register(models.Profile{})
+	gob.Register(models.UserSettings{})
 	gob.Register(models.Signin{})
 
 	// Get the template cache from appConfg

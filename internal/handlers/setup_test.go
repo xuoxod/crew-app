@@ -79,7 +79,6 @@ func getRoutes() http.Handler {
 	mux.Get("/register", Repo.RegisterPage)
 	mux.Post("/register", Repo.PostRegisterPage)
 	mux.Get("/registrationsummary", Repo.RegistrationSummary)
-	mux.Post("/signin", Repo.SigninPage)
 	mux.Get("/dummy", Repo.DummyHandler)
 	mux.Get("/dashboard", Repo.Dashboard)
 

@@ -4,12 +4,9 @@ import "github.com/xuoxod/crew-app/internal/models"
 
 type DatabaseRepo interface {
 	AllUsers() bool
-	CreateUser(res models.User) (int, error)
-	GetUserByID(id int) (models.User, error)
-	GetUserByEmail(email string) (models.User, error)
-	UpdateUserProfile(u models.User) map[string]string
-	CreateUserProfile(u models.User) map[string]string
-	Authenticate(email, testPassword string) (int, string, error)
+	CreateUser(res models.Member) (int, error)
+	GetUserByID(id int) (models.Member, error)
+	GetUserByEmail(email string) (models.Member, error)
+	UpdateUserProfile(u models.Member, p models.Profile) map[string]string
 	AuthenticateUser(email, testPassword string) map[string]string
-	InsertCraft(c models.Craft) (int, error)
 }

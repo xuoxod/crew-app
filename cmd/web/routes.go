@@ -28,7 +28,6 @@ func routes(app *config.AppConfig) http.Handler {
 		mux.Get("/register", handlers.Repo.RegisterPage)
 		mux.Post("/register", handlers.Repo.PostRegisterPage)
 		mux.Get("/registrationsummary", handlers.Repo.RegistrationSummary)
-		mux.Post("/signin", handlers.Repo.SigninPage)
 		mux.Post("/login", handlers.Repo.LoginPage)
 	})
 
@@ -38,7 +37,6 @@ func routes(app *config.AppConfig) http.Handler {
 		mux.Get("/settings", handlers.Repo.SettingsPage)
 		mux.Get("/profile", handlers.Repo.ProfilePage)
 		mux.Post("/profile/update", handlers.Repo.UpdateTheUserProfile)
-		mux.Post("/profile/create", handlers.Repo.CreateUserProfile)
 		mux.Get("/signout", handlers.Repo.SignOut)
 		mux.Get("/logout", handlers.Repo.Logout)
 	})

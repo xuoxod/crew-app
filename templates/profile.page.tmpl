@@ -11,12 +11,9 @@ Profile
                 <div class="w3-container w3-margin">
                     <div class="w3-container w3-row">
                         {{$user := index .Data "loggedin"}}
+                        {{$profile := index .Data "profile"}}
 
-                        {{if (eq $user.ImageURL "no")}}
-                        <form action="/user/profile/create" method="post" class="needs-validation" novalidate>
-                        {{else}}
                         <form action="/user/profile/update" method="post" class="needs-validation" novalidate>
-                        {{end}}
 
                             <div class="mb-3">
                                 <label for="fname" class="form-label w3-left">
@@ -46,22 +43,7 @@ Profile
                                     {{end}}" name="lname" placeholder="Enter last name" autocomplete="off"
                                     aria-label="Last Name" aria-describedby="addon-wrapping" value="{{$user.LastName}}">
                             </div>
-
-                            {{if (eq $user.ImageURL "no")}}
-                            <div class="mb-3">
-                                <label for="uname" class="form-label w3-left">
-                                    <strong>
-                                        User Name
-                                        {{with .Form.Errors.Get "uname"}}
-                                        <label for="" class="text-danger">{{.}}</label>
-                                        {{end}}
-                                    </strong>
-                                </label>
-                                <input type="text" class="form-control {{with .Form.Errors.Get "uname"}} is-invalid
-                                    {{end}}" name="uname" placeholder="Enter your picture URL" autocomplete="off"
-                                    aria-label="Image URL" aria-describedby="addon-wrapping">
-                            </div>
-                            {{else}}
+                            
                             <div class="mb-3">
                                 <label for="uname" class="form-label w3-left">
                                     <strong>
@@ -73,9 +55,8 @@ Profile
                                 </label>
                                 <input type="text" class="form-control {{with .Form.Errors.Get "uname"}} is-invalid
                                     {{end}}" name="uname" autocomplete="off"
-                                    aria-label="Image URL" aria-describedby="addon-wrapping" value="{{$user.Username}}">
+                                    aria-label="Image URL" aria-describedby="addon-wrapping" value="{{$profile.UserName}}">
                             </div>
-                            {{end}}
 
 
                             <div class="mb-3">
@@ -106,21 +87,6 @@ Profile
                                     aria-label="Username" aria-describedby="addon-wrapping" value="{{$user.Phone}}">
                             </div>
 
-                            {{if (eq $user.ImageURL "no")}}
-                            <div class="mb-3">
-                                <label for="imgurl" class="form-label w3-left">
-                                    <strong>
-                                        Image URL
-                                        {{with .Form.Errors.Get "imgurl"}}
-                                        <label for="" class="text-danger">{{.}}</label>
-                                        {{end}}
-                                    </strong>
-                                </label>
-                                <input type="text" class="form-control {{with .Form.Errors.Get "imgurl"}} is-invalid
-                                    {{end}}" name="imgurl" placeholder="Enter your picture URL" autocomplete="off"
-                                    aria-label="Image URL" aria-describedby="addon-wrapping">
-                            </div>
-                            {{else}}
                             <div class="mb-3">
                                 <label for="imgurl" class="form-label w3-left">
                                     <strong>
@@ -132,9 +98,78 @@ Profile
                                 </label>
                                 <input type="url" class="form-control {{with .Form.Errors.Get "imgurl"}} is-invalid
                                     {{end}}" name="imgurl" autocomplete="off"
-                                    aria-label="Image URL" aria-describedby="addon-wrapping" value="{{$user.ImageURL}}">
+                                    aria-label="Image URL" aria-describedby="addon-wrapping" value="{{$profile.ImageURL}}">
                             </div>
-                            {{end}}
+
+                            <div class="mb-3">
+                                <label for="craft" class="form-label w3-left">
+                                    <strong>
+                                        Craft
+                                        {{with .Form.Errors.Get "craft"}}
+                                        <label for="craft" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "craft"}} is-invalid
+                                    {{end}}" name="craft" autocomplete="off"
+                                    aria-label="Craft" aria-describedby="addon-wrapping" value="{{$profile.Craft}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="yos" class="form-label w3-left">
+                                    <strong>
+                                        Service Years
+                                        {{with .Form.Errors.Get "yos"}}
+                                        <label for="yos" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="number" class="form-control {{with .Form.Errors.Get "yos"}} is-invalid
+                                    {{end}}" name="yos" autocomplete="off"
+                                    aria-label="Image URL" aria-describedby="addon-wrapping" value="{{$profile.YOS}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label w3-left">
+                                    <strong>
+                                        Home Adress
+                                        {{with .Form.Errors.Get "address"}}
+                                        <label for="address" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "address"}} is-invalid
+                                    {{end}}" name="address" autocomplete="off"
+                                    aria-label="Address" aria-describedby="addon-wrapping" value="{{$profile.Address}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="city" class="form-label w3-left">
+                                    <strong>
+                                        City
+                                        {{with .Form.Errors.Get "city"}}
+                                        <label for="city" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "city"}} is-invalid
+                                    {{end}}" name="city" autocomplete="off"
+                                    aria-label="Address" aria-describedby="addon-wrapping" value="{{$profile.City}}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="state" class="form-label w3-left">
+                                    <strong>
+                                        State
+                                        {{with .Form.Errors.Get "state"}}
+                                        <label for="state" class="text-danger">{{.}}</label>
+                                        {{end}}
+                                    </strong>
+                                </label>
+                                <input type="text" class="form-control {{with .Form.Errors.Get "state"}} is-invalid
+                                    {{end}}" name="state" autocomplete="off"
+                                    aria-label="State" aria-describedby="addon-wrapping" value="{{$profile.State}}">
+                            </div>
 
                             <div class="mb-3">
                                 <label for="createdat" class="form-label w3-left">
@@ -152,13 +187,11 @@ Profile
                                         Last Updated
                                     </strong>
                                 </label>
-                                <input type="text" class="form-control" readonly name="updatedat" autocomplete="off" aria-label="Update Date" aria-describedby="addon-wrapping" value="{{$user.Updated}}">
+                                <input type="text" class="form-control" readonly name="updatedat" autocomplete="off" aria-label="Update Date" aria-describedby="addon-wrapping" value="{{$profile.UpdatedAt}}">
                             </div>                                 
 
                             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                             {{if (eq $user.HasID "yes")}}
                             <input type="hidden" name="user_id" value="{{$user.ID}}">
-                            {{end}}
                             <div class="input-group flex-nowrap w3-margin-top">
                                 <input class="w3-btn w3-blue w3-ripple w3-round-large" type="submit" value="Update">
                             </div>

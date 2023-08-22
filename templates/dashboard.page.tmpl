@@ -5,6 +5,7 @@ Dashboard
 
 {{define "content"}}
 {{$user := index .Data "loggedin"}}
+{{$profile := index .Data "profile"}}
 <div class="row">
   <div class="col-md-3 grid-margin stretch-card">
     <div class="card">
@@ -15,13 +16,13 @@ Dashboard
           <h3 class="mb-0 mb-md-2 mb-xl-0 order-md-1 order-xl-0">Info</h3>
 
           <div class="d-grid justify-content align-items-center">
-            <img class="icon-md text-muted mb-0 mb-md-3 mb-xl-0" src="{{$user.ImageURL}}" style="width:80%;height:70%;">
+            <img class="icon-md text-muted mb-0 mb-md-3 mb-xl-0" src="{{$profile.ImageURL}}" style="width:80%;height:70%;">
             <a class="link" style="text-decoration:none;" href="/user/profile">Edit</a>
           </div>
 
         </div>
 
-        <p class="mb-0 mt-2 text-primary">Username <span class="text-black ms-1"><small>{{$user.Username}}</small></span>
+        <p class="mb-0 mt-2 text-primary">Username <span class="text-black ms-1"><small>{{$profile.UserName}}</small></span>
         </p>
 
         <p class="mb-0 mt-2 text-primary">Email <span class="text-black ms-1"><small>{{$user.Email}}</small></span>

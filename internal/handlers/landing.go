@@ -136,7 +136,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 
 	// $2a$12$wPXDZd9LKDchbmN3cUn9K.Jqr73IfVqpx9XabDcGq5H0/8dMwqnYW
 
-	newUser := models.User{
+	newUser := models.Member{
 		FirstName: r.Form.Get("fname"),
 		LastName:  r.Form.Get("lname"),
 		Email:     r.Form.Get("email"),
@@ -167,61 +167,7 @@ func (m *Repository) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/registrationsummary", http.StatusSeeOther)
 }
 
-// @desc        Signin user
-// @route       POST /signin
-// @access      Public
-func (m *Repository) SigninPage(w http.ResponseWriter, r *http.Request) {
-	_ = m.App.Session.RenewToken(r.Context())
-
-	err := r.ParseForm()
-
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	signin := models.Signin{
-		Email:    r.Form.Get("email"),
-		Password: r.Form.Get("password"),
-	}
-
-	// form validation
-	fmt.Println("signin posted")
-
-	form := forms.New(r.PostForm)
-	form.IsEmail("email")
-	form.Required("email", "password")
-
-	if !form.Valid() {
-		data := make(map[string]interface{})
-		data["signin"] = signin
-
-		_ = render.Template(w, r, "home.page.tmpl", &models.TemplateData{Form: form, Data: data})
-		return
-	}
-
-	var email string
-	var password string
-
-	email = r.Form.Get("email")
-	password = r.Form.Get("password")
-
-	// Authenticate user
-	id, _, err := m.DB.Authenticate(email, password)
-
-	if err != nil {
-		log.Println("Authentication failed")
-		m.App.Session.Put(r.Context(), "error", "Invalid signin credentials")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
-	m.App.Session.Put(r.Context(), "user_id", id)
-	m.App.Session.Put(r.Context(), "flash", "Authenticated succesfully")
-	http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-}
-
-// @desc        Signin user
+// @desc        Login user
 // @route       POST /login
 // @access      Public
 func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
@@ -280,13 +226,29 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	lastName := libs.Cap(results["lastName"])
 	emailAddress := results["email"]
 	phone := results["phone"]
-	accessLevel, _ := strconv.Atoi(results["accessLevel"])
-	craftID, _ := strconv.Atoi(results["craftID"])
-	updatedAt := strings.Split(results["updatedAt"], " ")[0]
-	createdAt := strings.Split(results["createdAt"], " ")[0]
 	userName := results["userName"]
 	imgUrl := results["imgUrl"]
-	profileStatus := results["profileStatus"]
+	craft := results["craft"]
+	address := results["address"]
+	city := results["city"]
+	state := results["state"]
+	displayName := results["displayName"]
+	accessLevel, _ := strconv.Atoi(results["accessLevel"])
+	createdAt := strings.Split(results["createdAt"], " ")[0]
+	updatedAt := strings.Split(results["updatedAt"], " ")[0]
+	yearsService := results["yos"]
+	showProfile := results["showProfile"]
+	showOnlineStatus := results["showOnlineStatus"]
+	showCity := results["showCity"]
+	showState := results["showState"]
+	showDisplayName := results["showDisplayName"]
+	showContactInfo := results["showContactInfo"]
+	showPhone := results["showPhone"]
+	showEmail := results["showEmail"]
+	showCraft := results["showCraft"]
+	showRun := results["showRun"]
+	showNotifications := results["showNotifications"]
+	problem := results["err"]
 
 	const layout = "2006-01-02"
 	creationDate, creationErr := time.Parse(layout, createdAt)
@@ -302,59 +264,101 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch profileStatus {
-	case "noprofile":
-		fmt.Printf("User is authenticated without a profile\n\tID:\t%d\n\tFirst Name:\t%s\n\tLast Name:\t%s\n\tEmail:\t%s\n\tPhone:\t%s\n\tCreated At:\t%v\n\tUpdated At:\t%v\n\n", userID, firstName, lastName, emailAddress, phone, createdAt, updatedAt)
-
-		loggedIn := models.User{
-			ID:           userID,
-			FirstName:    firstName,
-			LastName:     lastName,
-			Email:        emailAddress,
-			Phone:        phone,
-			AccessLevel:  accessLevel,
-			CraftID:      craftID,
-			CreatedAt:    creationDate,
-			UpdatedAt:    updatedLast,
-			CreationDate: createdAt,
-			Updated:      updatedAt,
-			ImageURL:     "no",
-			HasID:        "yes",
-		}
-
-		data := make(map[string]interface{})
-		data["loggedin"] = loggedIn
-
-		m.App.Session.Put(r.Context(), "user_id", userID)
-		m.App.Session.Put(r.Context(), "loggedin", loggedIn)
-
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-
-	case "hasprofile":
-		fmt.Printf("User is authenticated with a profile\n\tFirst Name:\t%s\n\tLast Name:\t%s\n\tEmail:\t%s\n\tPhone:\t%s\n\tCreated At:\t%v\n\tUpdated At:\t%v\n\tUsername:\t%v\n\tImage URL:\t%v\n\n", firstName, lastName, emailAddress, phone, createdAt, updatedAt, userName, imgUrl)
-
-		loggedIn := models.User{
-			FirstName:    firstName,
-			LastName:     lastName,
-			Email:        emailAddress,
-			Phone:        phone,
-			AccessLevel:  accessLevel,
-			CreatedAt:    creationDate,
-			UpdatedAt:    updatedLast,
-			CreationDate: createdAt,
-			Updated:      updatedAt,
-			ImageURL:     imgUrl,
-			Username:     userName,
-		}
-
-		data := make(map[string]interface{})
-		data["loggedin"] = loggedIn
-
-		m.App.Session.Put(r.Context(), "user_id", emailAddress)
-		m.App.Session.Put(r.Context(), "loggedin", loggedIn)
-
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+	if problem != "" {
+		fmt.Println("Authentication error:\t", problem)
+		m.App.Session.Put(r.Context(), "error", "Authentication Failed")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
+
+	fmt.Println("User Authenticated")
+	fmt.Println("ID:\t", userID)
+	fmt.Println("First Name:\t", firstName)
+	fmt.Println("Last Name:\t", lastName)
+	fmt.Println("Email Address:\t", email)
+	fmt.Println("Phone:\t", phone)
+	fmt.Println("User Name:\t", userName)
+	fmt.Println("Image URL:\t", imgUrl)
+	fmt.Println("Craft:\t", craft)
+	fmt.Println("Address:\t", address)
+	fmt.Println("City:\t", city)
+	fmt.Println("State:\t", state)
+	fmt.Println("Display Name:\t", displayName)
+	fmt.Println("Access Level:\t", accessLevel)
+	fmt.Println("Created At:\t", createdAt)
+	fmt.Println("Last Updated:\t", updatedAt)
+	fmt.Println("Years of Service:\t", yearsService)
+	fmt.Println("Show Profile:\t", showProfile)
+	fmt.Println("Show Online Status:\t", showOnlineStatus)
+	fmt.Println("Show City:\t", showCity)
+	fmt.Println("Show State:\t", showState)
+	fmt.Println("Show Display Name:\t", showDisplayName)
+	fmt.Println("Show Contact Info:\t", showContactInfo)
+	fmt.Println("Show Phone:\t", showPhone)
+	fmt.Println("Show Email:\t", showEmail)
+	fmt.Println("Show Craft:\t", showCraft)
+	fmt.Println("Show Run:\t", showRun)
+	fmt.Println("Show Notifications:\t", showNotifications)
+
+	yos, _ := strconv.Atoi(yearsService)
+	profileShow, _ := strconv.ParseBool(showProfile)
+	onlineStatusShow, _ := strconv.ParseBool(showOnlineStatus)
+	cityShow, _ := strconv.ParseBool(showCity)
+	stateShow, _ := strconv.ParseBool(showState)
+	displayNameShow, _ := strconv.ParseBool(showDisplayName)
+	contactInfoShow, _ := strconv.ParseBool(showContactInfo)
+	phoneShow, _ := strconv.ParseBool(showPhone)
+	emailShow, _ := strconv.ParseBool(showEmail)
+	craftShow, _ := strconv.ParseBool(showCraft)
+	runShow, _ := strconv.ParseBool(showRun)
+	notificationsShow, _ := strconv.ParseBool(showNotifications)
+
+	member := models.Member{
+		ID:           userID,
+		FirstName:    firstName,
+		LastName:     lastName,
+		Email:        emailAddress,
+		Phone:        phone,
+		UpdatedAt:    updatedLast,
+		Updated:      updatedAt,
+		CreatedAt:    creationDate,
+		CreationDate: createdAt,
+	}
+
+	userProfile := models.Profile{
+		MemberID:    userID,
+		UserName:    userName,
+		ImageURL:    imgUrl,
+		Craft:       craft,
+		Address:     address,
+		City:        city,
+		State:       state,
+		DisplayName: displayName,
+		YOS:         yos,
+	}
+
+	userSettings := models.UserSettings{
+		MemberID:          userID,
+		ShowProfile:       profileShow,
+		ShowOnlineStatus:  onlineStatusShow,
+		ShowCity:          cityShow,
+		ShowState:         stateShow,
+		ShowDisplayName:   displayNameShow,
+		ShowContactInfo:   contactInfoShow,
+		ShowPhone:         phoneShow,
+		ShowEmail:         emailShow,
+		ShowCraft:         craftShow,
+		ShowRun:           runShow,
+		ShowNotifications: notificationsShow,
+	}
+
+	m.App.Session.Put(r.Context(), "user_id", userID)
+	m.App.Session.Put(r.Context(), "loggedin", member)
+	m.App.Session.Put(r.Context(), "user_profile", userProfile)
+	m.App.Session.Put(r.Context(), "user_settings", userSettings)
+
+	http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+
 }
 
 // @desc        Signout user
@@ -423,18 +427,34 @@ func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request)
 // @route       GET /user/dashboard
 // @access      Private
 func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
-	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
+	data := make(map[string]interface{})
 
-	if !ok {
-		log.Println("Cannot get item from session")
-		m.App.ErrorLog.Println("Can't get error from the session")
+	fmt.Println("Get Dashboard Page")
+
+	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
+	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
+
+	if !loggedInOk {
+		log.Println("Cannot get loggedin session")
+		m.App.ErrorLog.Println("Can't get loggedin from the session")
 		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
 
-	data := make(map[string]interface{})
+	if !profileOk {
+		log.Println("Cannot get profile session")
+		m.App.ErrorLog.Println("Can't get profile from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get profile from session")
+		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	fmt.Println("loggedin:\t", loggedin)
+	fmt.Println("profile:\t", profile)
+
 	data["loggedin"] = loggedin
+	data["profile"] = profile
 
 	_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
 }
@@ -443,11 +463,11 @@ func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 // @route       GET /user/settings
 // @access      Private
 func (m *Repository) SettingsPage(w http.ResponseWriter, r *http.Request) {
-	var emptyUserForm models.User
+	var emptyUserForm models.Member
 	data := make(map[string]interface{})
 	data["setting"] = emptyUserForm
 
-	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
+	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 
 	if !ok {
 		log.Println("Cannot get item from session")
@@ -466,25 +486,37 @@ func (m *Repository) SettingsPage(w http.ResponseWriter, r *http.Request) {
 // @route       GET /user/update
 // @access      Private
 func (m *Repository) ProfilePage(w http.ResponseWriter, r *http.Request) {
-	var emptyUserForm models.User
+	var emptyUserForm models.Member
 	data := make(map[string]interface{})
 	data["profile"] = emptyUserForm
 
 	fmt.Println("Get Profile Page")
 
-	loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
+	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
+	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 
-	if !ok {
-		log.Println("Cannot get item from session")
-		m.App.ErrorLog.Println("Can't get error from the session")
+	if !loggedInOk {
+		log.Println("Cannot get loggedin session")
+		m.App.ErrorLog.Println("Can't get loggedin from the session")
 		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
 		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
 
-	// fmt.Printf("\n\n\t\tLoggedin Data:\t\t%v\n\n", loggedin)
+	if !profileOk {
+		log.Println("Cannot get profile session")
+		m.App.ErrorLog.Println("Can't get profile from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get profile from session")
+		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	fmt.Println("loggedin:\t", loggedin)
+	fmt.Println("profile:\t", profile)
 
 	data["loggedin"] = loggedin
+	data["profile"] = profile
+
 	_ = render.Template(w, r, "profile.page.tmpl", &models.TemplateData{
 		Data: data,
 		Form: forms.New(nil),
@@ -497,6 +529,7 @@ func (m *Repository) ProfilePage(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request) {
 	// Remove the old user data from the session
 	m.App.Session.Remove(r.Context(), "loggedin")
+	m.App.Session.Remove(r.Context(), "user_profile")
 
 	err := r.ParseForm()
 
@@ -506,16 +539,24 @@ func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	updatedUser := models.User{
+	yos, _ := strconv.Atoi(r.Form.Get("yos"))
+
+	updatedMemberInfo := models.Member{
 		FirstName: r.Form.Get("fname"),
 		LastName:  r.Form.Get("lname"),
 		Email:     r.Form.Get("email"),
 		Phone:     r.Form.Get("phone"),
-		Username:  r.Form.Get("uname"),
-		ImageURL:  r.Form.Get("imgurl"),
 	}
 
-	// fmt.Printf("Parsed Form:\t%v\n", updatedUser)
+	updatedProfileInfo := models.Profile{
+		ImageURL: r.Form.Get("imgurl"),
+		UserName: r.Form.Get("uname"),
+		Craft:    r.Form.Get("craft"),
+		YOS:      yos,
+		Address:  r.Form.Get("address"),
+		City:     r.Form.Get("city"),
+		State:    r.Form.Get("state"),
+	}
 
 	// form validation
 
@@ -523,11 +564,11 @@ func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request
 	form.MinLength("fname", 2, r)
 	form.MinLength("lname", 2, r)
 	form.IsEmail("email")
-	form.Required("email", "fname", "lname", "uname", "phone", "imgurl")
+	form.Required("email", "fname", "lname", "uname", "phone", "imgurl", "craft", "address", "city", "state")
 
 	if !form.Valid() {
 		fmt.Printf("\n\tForm Error:\t%v\n\n", form.Errors)
-		loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
+		loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 
 		if !ok {
 			log.Println("Cannot get item from session")
@@ -548,147 +589,105 @@ func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request
 	}
 
 	// fmt.Printf("\nUpdate the user's profile\n")
-	results := m.DB.UpdateUserProfile(updatedUser)
+	results := m.DB.UpdateUserProfile(updatedMemberInfo, updatedProfileInfo)
 
 	// fmt.Printf("\n\n\t\tUpdated User Profile Data\n\t\t\t%v\n\n", results)
 
-	if results["err"] != "" {
-		fmt.Printf("\n\tProfile update error: %s\n\n", results["err"])
-	}
-
-	userId, _ := strconv.Atoi(results["userID"])
-	craftId, _ := strconv.Atoi(results["craftID"])
-
-	/* 	const layout = "2006-01-02"
-	   	creationDate, _ := time.Parse(layout, results["createdAt"])
-	   	updatedDate, _ := time.Parse(layout, results["updatedAt"]) */
-
-	loggedIn := models.User{
-		FirstName:    results["firstName"],
-		LastName:     results["lastName"],
-		ID:           userId,
-		Email:        results["email"],
-		Phone:        results["phone"],
-		CraftID:      craftId,
-		Username:     results["userName"],
-		ImageURL:     results["imageUrl"],
-		CreationDate: results["createdAt"],
-		Updated:      results["updatedAt"],
-		HasID:        "yes",
-	}
-
-	fmt.Println("\tUpdated User Profile Data")
-	fmt.Println("User ID: ", results["userID"])
-	fmt.Println("First Name: ", results["firstName"])
-	fmt.Println("Last Name: ", results["lastName"])
-	fmt.Println("Email: ", results["email"])
-	fmt.Println("Phone: ", results["phone"])
-	fmt.Println("Craft ID: ", results["craftID"])
-	fmt.Println("Created: ", results["createdAt"])
-	fmt.Println("Updated: ", results["updatedAt"])
-	fmt.Printf("\n\n")
-
-	// Add the update user data to the session
-	m.App.Session.Put(r.Context(), "loggedin", loggedIn)
-
-	http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
-}
-
-// @desc        Create user profile
-// @route       POST /signin
-// @access      private
-func (m *Repository) CreateUserProfile(w http.ResponseWriter, r *http.Request) {
-	// Remove the old user data from the session
-	m.App.Session.Remove(r.Context(), "loggedin")
-
-	err := r.ParseForm()
-
-	if err != nil {
-		helpers.ServerError(w, err)
+	if results["memberQueryErr"] != "" {
 		return
 	}
 
-	user_id, err := strconv.Atoi(r.Form.Get("user_id"))
-
-	if err != nil {
-		fmt.Println("user_id conversion failed")
+	if results["memberRowsScanErr"] != "" {
+		return
 	}
 
-	updatedUser := models.User{
-		ID:        user_id,
-		FirstName: r.Form.Get("fname"),
-		LastName:  r.Form.Get("lname"),
-		Email:     r.Form.Get("email"),
-		Phone:     r.Form.Get("phone"),
-		Username:  r.Form.Get("uname"),
-		ImageURL:  r.Form.Get("imgurl"),
+	if results["memberRerr"] != "" {
+		return
 	}
 
-	// form validation
-
-	form := forms.New(r.PostForm)
-	form.MinLength("fname", 2, r)
-	form.MinLength("lname", 2, r)
-	form.IsEmail("email")
-	// form.Required("email", "fname", "lname", "uname", "phone", "imgurl")
-
-	if !form.Valid() {
-		fmt.Printf("\n\tForm Error:\t%v\n\n", form.Errors)
-		loggedin, ok := m.App.Session.Get(r.Context(), "loggedin").(models.User)
-
-		if !ok {
-			log.Println("Cannot get item from session")
-			m.App.ErrorLog.Println("Can't get error from the session")
-			m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
-			return
-		}
-
-		data := make(map[string]interface{})
-		data["loggedin"] = loggedin
-
-		_ = render.Template(w, r, "profile.page.tmpl", &models.TemplateData{
-			Form: form,
-			Data: data,
-		})
+	if results["memberRowsErr"] != "" {
+		return
 	}
 
-	results := m.DB.CreateUserProfile(updatedUser)
-	userId, _ := strconv.Atoi(results["userID"])
-	craftId, _ := strconv.Atoi(results["craftID"])
+	if results["profileRowsScanError"] != "" {
+		return
+	}
 
-	/* 	const layout = "2006-01-02"
-	   	creationDate, _ := time.Parse(layout, results["createdAt"])
-	   	updatedDate, _ := time.Parse(layout, results["updatedAt"]) */
+	if results["profileRerr"] != "" {
+		return
+	}
 
-	loggedIn := models.User{
-		FirstName:    results["firstName"],
-		LastName:     results["lastName"],
+	if results["profileRowsErr"] != "" {
+		return
+	}
+
+	memberID := results["userID"]
+	userId, _ := strconv.Atoi(memberID)
+	firstName := results["firstName"]
+	lastName := results["lastName"]
+	email := results["email"]
+	phone := results["phone"]
+	userName := results["userName"]
+	displayName := results["displayName"]
+	imageUrl := results["imageUrl"]
+	craft := results["craft"]
+	address := results["address"]
+	city := results["city"]
+	state := results["state"]
+	createdAt := results["createdAt"]
+	profileUpdatedAt := results["profileUpdatedAt"]
+	yearsService := results["yearsService"]
+
+	const layout = "2006-01-02"
+	_createdAt, _ := time.Parse(layout, results["createdAt"])
+	updatedDate, _ := time.Parse(layout, profileUpdatedAt)
+
+	serviceYears, _ := strconv.Atoi(yearsService)
+
+	loggedIn := models.Member{
+		FirstName:    firstName,
+		LastName:     lastName,
 		ID:           userId,
-		Email:        results["email"],
-		Phone:        results["phone"],
-		CraftID:      craftId,
-		Username:     results["userName"],
-		ImageURL:     results["imageUrl"],
-		CreationDate: results["createdAt"],
-		Updated:      results["updatedAt"],
-		HasID:        "yes",
+		Email:        email,
+		Phone:        phone,
+		CreationDate: createdAt,
+		CreatedAt:    _createdAt,
+		UpdatedAt:    updatedDate,
 	}
 
-	fmt.Println("\tCreate User Profile Data")
-	fmt.Println("User ID: ", results["userID"])
-	fmt.Println("First Name: ", results["firstName"])
-	fmt.Println("Last Name: ", results["lastName"])
-	fmt.Println("Email: ", results["email"])
-	fmt.Println("Phone: ", results["phone"])
-	fmt.Println("Craft ID: ", results["craftID"])
-	fmt.Println("User Name: ", results["userName"])
-	fmt.Println("Image URL: ", results["imageUrl"])
-	fmt.Println("Created: ", results["createdAt"])
-	fmt.Println("Updated: ", results["updatedAt"])
+	profile := models.Profile{
+		UserName:    userName,
+		DisplayName: displayName,
+		ImageURL:    imageUrl,
+		Craft:       craft,
+		Address:     address,
+		City:        city,
+		State:       state,
+		UpdatedAt:   updatedDate,
+		YOS:         serviceYears,
+	}
+
+	fmt.Println("\tUpdated User Profile Data")
+	fmt.Println("User ID: ", userId)
+	fmt.Println("First Name: ", firstName)
+	fmt.Println("Last Name: ", lastName)
+	fmt.Println("User Name: ", userName)
+	fmt.Println("Display Name: ", displayName)
+	fmt.Println("Email: ", email)
+	fmt.Println("Phone: ", phone)
+	fmt.Println("Craft: ", craft)
+	fmt.Println("Created: ", createdAt)
+	fmt.Println("Updated: ", profileUpdatedAt)
+	fmt.Println("Image URL: ", imageUrl)
+	fmt.Println("Address: ", address)
+	fmt.Println("City: ", city)
+	fmt.Println("State: ", state)
+	fmt.Println("Service Years: ", serviceYears)
 	fmt.Printf("\n\n")
 
 	// Add the update user data to the session
 	m.App.Session.Put(r.Context(), "loggedin", loggedIn)
+	m.App.Session.Put(r.Context(), "user_profile", profile)
 
 	http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
 }

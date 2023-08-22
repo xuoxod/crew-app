@@ -1,9 +1,0 @@
-PORT=":8080"
-SPORT=":443"
-DB_URL="postgres://krxbyhhs:Rdd9d7ZIY3N4sVtGwKGicMXQk36PC5KN@stampy.db.elephantsql.com/krxbyhhs"
-DB_HOST="stampy.db.elephantsql.com"
-DB_PORT=5432
-DB_USER="krxbyhhs"
-DB_NAME="krxbyhhs"
-DB_PASSWD="Rdd9d7ZIY3N4sVtGwKGicMXQk36PC5KN"
-SSL_MODE="disable"

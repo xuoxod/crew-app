@@ -18,49 +18,49 @@ type Signin struct {
 	Password string
 }
 
-// User data
-type User struct {
-	ID            int
-	FirstName     string
-	LastName      string
-	Email         string
-	Phone         string
-	Password      string
-	AccessLevel   int
-	CraftID       int
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	CreationDate  string
-	Updated       string
-	ProfileStatus string
-	ImageURL      string
-	Username      string
-	HasID         string
+// Member data
+type Member struct {
+	ID           int
+	FirstName    string
+	LastName     string
+	Email        string
+	Phone        string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Password     string
+	CreationDate string
+	Updated      string
 }
 
 // User profile
 type Profile struct {
-	UserName string
-	UserID   int
-	ImageURL string
+	MemberID    int
+	UserName    string
+	ImageURL    string
+	Craft       string
+	Address     string
+	City        string
+	State       string
+	DisplayName string
+	YOS         int
+	UpdatedAt   time.Time
 }
 
 // Craft data
-type Craft struct {
-	ID      int
-	Title   string
-	CraftID int
-	UserID  int
-}
-
-// Run data
-type Run struct {
-	RunNumber     int
-	StartLocation string
-	StartTime     time.Time
-	EndTime       time.Time
-	LeaveTime     time.Time
-	HOS           int
+type UserSettings struct {
+	MemberID          int
+	ShowProfile       bool
+	ShowOnlineStatus  bool
+	ShowAddress       bool
+	ShowCity          bool
+	ShowState         bool
+	ShowDisplayName   bool
+	ShowContactInfo   bool
+	ShowPhone         bool
+	ShowEmail         bool
+	ShowCraft         bool
+	ShowRun           bool
+	ShowNotifications bool
 }
 
 // Crew member data

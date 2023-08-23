@@ -11,9 +11,7 @@ Settings
                 <div class="w3-container w3-margin">
                     <div class="w3-container w3-row">
                         {{$user := index .Data "loggedin"}}
-                        {{$userid := index .Data "userid"}}
                         {{$setting := index .Data "settings"}}
-                        {{$formComps := index .Data "formComps"}}
 
                         <form action="/user/settings/update" method="post" class="needs-validation" novalidate>
                             <input type="hidden" name="member_id" value="{{$setting.MemberID}}">

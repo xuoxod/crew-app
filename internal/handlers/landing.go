@@ -508,100 +508,93 @@ func (m *Repository) PostSettingsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var showProfile, showOnlineStatus, showAddress, showCity, showState, showDisplayName, showContactInfo, showPhone, showEmail, showCraft, showRun, showNotifications bool
-
 	id, _ := strconv.Atoi(r.Form.Get("member_id"))
 
-	fmt.Println("Show Profile:\t", r.PostForm.Get("show_profile"))
-
-	if r.Form.Get("show_profile") == "" {
-		showProfile = false
-	} else {
-		showProfile = true
+	settings := models.UserSettings{
+		MemberID: id,
 	}
 
-	if r.Form.Get("show_online_status") == "" {
-		showOnlineStatus = false
-	} else {
-		showOnlineStatus = true
+	var key string
+
+	for key = range r.Form {
+		if key == "show_profile" {
+			settings.ShowProfile = true
+		}
+
+		if key == "show_online_status" {
+			settings.ShowOnlineStatus = true
+		}
+
+		if key == "show_address" {
+			settings.ShowAddress = true
+		}
+
+		if key == "show_city" {
+			settings.ShowCity = true
+		}
+
+		if key == "show_state" {
+			settings.ShowState = true
+		}
+
+		if key == "show_display_name" {
+			settings.ShowDisplayName = true
+		}
+
+		if key == "show_contact_info" {
+			settings.ShowContactInfo = true
+		}
+
+		if key == "show_phone" {
+			settings.ShowPhone = true
+		}
+
+		if key == "show_email" {
+			settings.ShowEmail = true
+		}
+
+		if key == "show_craft" {
+			settings.ShowCraft = true
+		}
+
+		if key == "show_run" {
+			settings.ShowRun = true
+		}
+
+		if key == "show_notif" {
+			settings.ShowNotifications = true
+		}
 	}
 
-	if r.Form.Get("show_address") == "" {
-		showAddress = false
-	} else {
-		showAddress = true
+	fmt.Printf("\n\n")
+
+	results := m.DB.UpdateUserSettings(settings)
+	resultsErr := results["err"]
+
+	if resultsErr != "" {
+		fmt.Println("Update Settings Query Error:\t", resultsErr)
+		return
 	}
 
-	if r.Form.Get("show_city") == "" {
-		showCity = false
-	} else {
-		showCity = true
-	}
+	// Remove the old user data from the session
+	m.App.Session.Remove(r.Context(), "user_settings")
 
-	if r.Form.Get("show_state") == "" {
-		showState = false
-	} else {
-		showState = true
-	}
+	memberId, _ := strconv.Atoi(results["memberId"])
+	showProfile, _ := strconv.ParseBool(results["showProfile"])
+	showOnlineStatus, _ := strconv.ParseBool(results["showOnlineStatus"])
+	showAddress, _ := strconv.ParseBool(results["showAddress"])
+	showCity, _ := strconv.ParseBool(results["showCity"])
+	showState, _ := strconv.ParseBool(results["showState"])
+	showDisplayName, _ := strconv.ParseBool(results["showDisplayName"])
+	showContactInfo, _ := strconv.ParseBool(results["showContactInfo"])
+	showPhone, _ := strconv.ParseBool(results["showPhone"])
+	showEmail, _ := strconv.ParseBool(results["showEmail"])
+	showCraft, _ := strconv.ParseBool(results["showCraft"])
+	showRun, _ := strconv.ParseBool(results["showRun"])
+	showNotifications, _ := strconv.ParseBool(results["showNotifications"])
 
-	if r.Form.Get("show_display_name") == "" {
-		showDisplayName = false
-	} else {
-		showDisplayName = true
-	}
-
-	if r.Form.Get("show_contact_info") == "" {
-		showContactInfo = false
-	} else {
-		showContactInfo = true
-	}
-
-	if r.Form.Get("show_phone") == "" {
-		showPhone = false
-	} else {
-		showPhone = true
-	}
-
-	if r.Form.Get("show_email") == "" {
-		showEmail = false
-	} else {
-		showEmail = true
-	}
-
-	if r.Form.Get("show_craft") == "" {
-		showCraft = false
-	} else {
-		showCraft = true
-	}
-
-	if r.Form.Get("show_run") == "" {
-		showRun = false
-	} else {
-		showRun = true
-	}
-
-	if r.Form.Get("show_notif") == "" {
-		showNotifications = false
-	} else {
-		showNotifications = true
-	}
-
-	fmt.Printf("\n\n\n")
-	fmt.Println("ShowProfile?\t", r.FormValue("show_profile"))
-	fmt.Println("ShowOnlineStatus?\t", r.FormValue("show_online_status"))
-	fmt.Println("ShowAddress?\t", r.FormValue("show_address"))
-	fmt.Println("ShowCity?\t", r.FormValue("show_city"))
-	fmt.Println("ShowState?\t", r.FormValue("show_state"))
-	fmt.Println("ShowDisplayName?\t", r.FormValue("show_display_name"))
-	fmt.Println("ShowContactInfo?\t", r.FormValue("show_contact_info"))
-	fmt.Println("ShowPhone?\t", r.FormValue("show_phone"))
-	fmt.Println("ShowEmail?\t", r.FormValue("show_email"))
-	fmt.Println("ShowCraft?\t", r.FormValue("show_craft"))
-	fmt.Println("ShowRun?\t", r.FormValue("show_run"))
-	fmt.Println("ShowNotifications?\t", r.FormValue("show_notif"))
-
-	userSettings := models.UserSettings{
-		MemberID:          id,
+	postSettings := models.UserSettings{
+		MemberID:          memberId,
 		ShowProfile:       showProfile,
 		ShowOnlineStatus:  showOnlineStatus,
 		ShowAddress:       showAddress,
@@ -616,7 +609,8 @@ func (m *Repository) PostSettingsPage(w http.ResponseWriter, r *http.Request) {
 		ShowNotifications: showNotifications,
 	}
 
-	fmt.Println(userSettings)
+	m.App.Session.Put(r.Context(), "user_settings", postSettings)
+
 	http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
 }
 
@@ -661,7 +655,7 @@ func (m *Repository) ProfilePage(w http.ResponseWriter, r *http.Request) {
 // @desc        Update user profile
 // @route       POST /signin
 // @access      private
-func (m *Repository) UpdateTheUserProfile(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) PostProfilePage(w http.ResponseWriter, r *http.Request) {
 	// Remove the old user data from the session
 	m.App.Session.Remove(r.Context(), "loggedin")
 	m.App.Session.Remove(r.Context(), "user_profile")

@@ -361,9 +361,70 @@ func (m *postgresDBRepo) AuthenticateUser(email, testPassword string) map[string
 	return results
 }
 
-func (m *postgresDBRepo) UpdateUserSettings(p models.UserSettings) map[string]string {
-
+func (m *postgresDBRepo) UpdateUserSettings(s models.UserSettings) map[string]string {
 	results := make(map[string]string)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var showProfile, showOnlineStatus, showAddress, showCity, showState, showDisplayName, showContactInfo, showPhone, showEmail, showCraft, showRun, showNotifications bool
+
+	settingsQuery := `
+	update user_settings s set show_profile = $1, show_online_status = $2, show_address = $3, show_city = $4, show_state = $5, show_display_name = $6, show_contact_info = $7, show_phone = $8, show_email = $9, show_craft = $10, show_run = $11, show_notifications = $12 where member_id = $13 returning show_profile, show_online_status, show_address, show_city, show_state, show_display_name, show_contact_info, show_phone, show_email, show_craft, show_run, show_notifications
+	`
+
+	settingsRows, settingsErr := m.DB.QueryContext(ctx, settingsQuery,
+		s.ShowProfile,
+		s.ShowOnlineStatus,
+		s.ShowAddress,
+		s.ShowCity,
+		s.ShowState,
+		s.ShowDisplayName,
+		s.ShowContactInfo,
+		s.ShowPhone,
+		s.ShowEmail,
+		s.ShowCraft,
+		s.ShowRun,
+		s.ShowNotifications,
+		s.MemberID,
+	)
+
+	if settingsErr != nil {
+		fmt.Println("Settings query error:\t", settingsErr.Error())
+		results["err"] = settingsErr.Error()
+		return results
+	}
+
+	for settingsRows.Next() {
+		if err := settingsRows.Scan(&showProfile, &showOnlineStatus, &showAddress, &showCity, &showState, &showDisplayName, &showContactInfo, &showPhone, &showEmail, &showCraft, &showRun, &showNotifications); err != nil {
+			fmt.Printf("Settings Row Scan Error: %s\n", err.Error())
+			results["err"] = err.Error()
+			return results
+		}
+	}
+
+	settingsRerr := settingsRows.Close()
+
+	if settingsRerr != nil {
+		fmt.Printf("SettingsRerr Error:\t%s\n", settingsErr.Error())
+		results["err"] = settingsRerr.Error()
+		return results
+	}
+
+	results["err"] = ""
+	results["memberId"] = fmt.Sprintf("%d", s.MemberID)
+	results["showProfile"] = fmt.Sprintf("%t", showProfile)
+	results["showOnlineStatus"] = fmt.Sprintf("%t", showOnlineStatus)
+	results["showAddress"] = fmt.Sprintf("%t", showAddress)
+	results["showCity"] = fmt.Sprintf("%t", showCity)
+	results["showState"] = fmt.Sprintf("%t", showState)
+	results["showDisplayName"] = fmt.Sprintf("%t", showDisplayName)
+	results["showContactInfo"] = fmt.Sprintf("%t", showContactInfo)
+	results["showPhone"] = fmt.Sprintf("%t", showPhone)
+	results["showEmail"] = fmt.Sprintf("%t", showEmail)
+	results["showCraft"] = fmt.Sprintf("%t", showCraft)
+	results["showRun"] = fmt.Sprintf("%t", showRun)
+	results["showNotifications"] = fmt.Sprintf("%t", showNotifications)
 
 	return results
 }

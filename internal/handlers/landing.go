@@ -266,6 +266,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	yearsService := results["yos"]
 	showProfile := results["showProfile"]
 	showOnlineStatus := results["showOnlineStatus"]
+	showAddress := results["showAddress"]
 	showCity := results["showCity"]
 	showState := results["showState"]
 	showDisplayName := results["showDisplayName"]
@@ -330,6 +331,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	yos, _ := strconv.Atoi(yearsService)
 	profileShow, _ := strconv.ParseBool(showProfile)
 	onlineStatusShow, _ := strconv.ParseBool(showOnlineStatus)
+	addressShow, _ := strconv.ParseBool(showAddress)
 	cityShow, _ := strconv.ParseBool(showCity)
 	stateShow, _ := strconv.ParseBool(showState)
 	displayNameShow, _ := strconv.ParseBool(showDisplayName)
@@ -368,6 +370,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 		MemberID:          userID,
 		ShowProfile:       profileShow,
 		ShowOnlineStatus:  onlineStatusShow,
+		ShowAddress:       addressShow,
 		ShowCity:          cityShow,
 		ShowState:         stateShow,
 		ShowDisplayName:   displayNameShow,

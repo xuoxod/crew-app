@@ -2,8 +2,10 @@ package dbrepo
 
 import "github.com/xuoxod/crew-app/internal/models"
 
-func (m *testDBRepo) AllUsers() bool {
-	return true
+func (m *testDBRepo) AllUsers() map[string][]string {
+	var results = make(map[string][]string)
+
+	return results
 }
 
 func (m *testDBRepo) CreateUser(res models.Member) (map[string]string, error) {

@@ -66,6 +66,7 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Profile{})
 	gob.Register(models.UserSettings{})
 	gob.Register(models.Signin{})
+	gob.Register(models.Users{})
 
 	// Get the template cache from appConfg
 

@@ -11,8 +11,45 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (m *postgresDBRepo) AllUsers() bool {
-	return true
+func (m *postgresDBRepo) AllUsers() map[string][]string {
+	var results = make(map[string][]string)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	query := `select id, first_name, last_name, email, phone, access_level, password from members`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+
+	if err != nil {
+		results["err"] = []string{err.Error()}
+		fmt.Println("Query Error:\t", err.Error())
+		return results
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var fname, lname, email, phone, password string
+		var id, accessLevel int
+		var strId, strAccesslevel string
+		var userDetails = []string{}
+
+		if scanErr := rows.Scan(&id, &fname, &lname, &email, &phone, &accessLevel, &password); scanErr != nil {
+			results["err"] = []string{scanErr.Error()}
+			fmt.Println("Scan Err:\t", scanErr.Error())
+			return results
+		}
+
+		strId = fmt.Sprintf("%d", id)
+		strAccesslevel = fmt.Sprintf("%d", accessLevel)
+		userDetails = append(userDetails, strId, fname, lname, email, phone, strAccesslevel, password)
+		results[strId] = userDetails
+	}
+
+	results["err"] = []string{""}
+	return results
+
 }
 
 func (m *postgresDBRepo) CreateUser(res models.Member) (map[string]string, error) {

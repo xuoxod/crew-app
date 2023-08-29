@@ -3,7 +3,7 @@ package repository
 import "github.com/xuoxod/crew-app/internal/models"
 
 type DatabaseRepo interface {
-	AllUsers() bool
+	AllUsers() map[string][]string
 	CreateUser(res models.Member) (map[string]string, error)
 	GetUserByID(id int) (models.Member, error)
 	GetUserByEmail(email string) (models.Member, error)

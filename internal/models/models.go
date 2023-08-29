@@ -25,6 +25,7 @@ type Member struct {
 	LastName     string
 	Email        string
 	Phone        string
+	AccessLevel  int
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	Password     string
@@ -75,4 +76,9 @@ type Crew struct {
 	LastName  string
 	Phone     string
 	ID        int
+}
+
+// Users slice
+type Users struct {
+	AllUsers map[string][]string
 }

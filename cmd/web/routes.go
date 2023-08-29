@@ -16,6 +16,7 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Use(NoSurf)
 	mux.Use(SessionLoad)
 	mux.Get("/dummy", handlers.Repo.DummyHandler)
+	mux.Get("/admin", handlers.Repo.AdminPage)
 
 	// Static files
 	fileServer := http.FileServer(http.Dir("./static/"))
@@ -40,6 +41,12 @@ func routes(app *config.AppConfig) http.Handler {
 		mux.Post("/profile/update", handlers.Repo.PostProfilePage)
 		mux.Get("/signout", handlers.Repo.SignOut)
 		mux.Get("/logout", handlers.Repo.Logout)
+	})
+
+	mux.Route("/admin", func(mux chi.Router) {
+		mux.Use(Auth)
+		mux.Get("/dashboard", handlers.Repo.AdminPage)
+		mux.Get("/users", handlers.Repo.AdminUsersPage)
 	})
 
 	return mux

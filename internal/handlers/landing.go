@@ -299,6 +299,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("")
 	fmt.Println("User Authenticated")
 	fmt.Println("ID:\t", userID)
 	fmt.Println("First Name:\t", firstName)
@@ -327,6 +328,7 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Show Craft:\t", showCraft)
 	fmt.Println("Show Run:\t", showRun)
 	fmt.Println("Show Notifications:\t", showNotifications)
+	fmt.Println("")
 
 	yos, _ := strconv.Atoi(yearsService)
 	profileShow, _ := strconv.ParseBool(showProfile)
@@ -899,9 +901,9 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // @desc        AdminPage Dashboard Page
-// @route       GET /admin
+// @route       GET /admin/users
 // @access      Private
-func (m *Repository) AdminUsersPage(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 
 	fmt.Println("Get Admin Page")
@@ -909,7 +911,6 @@ func (m *Repository) AdminUsersPage(w http.ResponseWriter, r *http.Request) {
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
-	allUsers, allusersOk := m.App.Session.Get(r.Context(), "allusers").(models.Users)
 
 	if !loggedInOk {
 		log.Println("Cannot get loggedin session")
@@ -935,22 +936,20 @@ func (m *Repository) AdminUsersPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !allusersOk {
-		log.Println("Cannot get allusers from session")
-		m.App.ErrorLog.Println("Can't get allusers from the session")
-		m.App.Session.Put(r.Context(), "error", "Can't get allusers from session")
-		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+	allUsers := m.DB.AllUsers()
+
+	err := allUsers["err"][0]
+	if err != "" {
+		fmt.Println("UsersPage error getting all users:\t", err)
 		return
 	}
 
-	for k, v := range allUsers.AllUsers {
-		fmt.Printf("Key: %s\tValue: %s\n", k, v)
-	}
+	delete(allUsers, "err")
 
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 	data["settings"] = usersettings
-	data["users"] = allUsers.AllUsers
+	data["users"] = allUsers
 
 	if loggedin.AccessLevel != 1 {
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
@@ -965,23 +964,7 @@ func (m *Repository) AdminUsersPage(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 	var emptyMemberForm models.Registration
 	data := make(map[string]interface{})
-	data["member"] = emptyMemberForm
-
-	fmt.Println("Get UserPage Page")
-
-	paramUserId := r.URL.Query().Get("userid")
-	userId, _ := strconv.ParseInt(paramUserId, 0, 32)
-
-	fmt.Println("Query Info:\t", userId)
-
-	member, err := m.DB.GetUserByID(int(userId))
-
-	if err != nil {
-		fmt.Println("UserPage handler error:\t", err.Error())
-		return
-	}
-
-	fmt.Println("Got user member:\t", member)
+	data["memberform"] = emptyMemberForm
 
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
@@ -1011,16 +994,98 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data["loggedin"] = loggedin
-	data["profile"] = profile
-	data["settings"] = usersettings
-	data["user"] = member
-
 	if loggedin.AccessLevel != 1 {
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
 	}
 
+	data["loggedin"] = loggedin
+	data["profile"] = profile
+	data["settings"] = usersettings
+
+	fmt.Println("Get UserPage Page")
+
+	paramUserId := r.URL.Query().Get("userid")
+	num, _ := strconv.ParseInt(paramUserId, 0, 32)
+	var userId int = int(num)
+
+	member, err := m.DB.GetUserByID(userId)
+
+	if err != nil {
+		fmt.Println("UserPage handler DB error:\t", err.Error())
+		return
+	}
+
+	data["member"] = member
+
 	_ = render.Template(w, r, "user.page.tmpl", &models.TemplateData{
 		Data: data,
 		Form: forms.New(nil)})
+}
+
+// @desc        Update user
+// @route       POST /admin/user/update
+// @access      private
+func (m *Repository) PostUserPage(w http.ResponseWriter, r *http.Request) {
+	data := make(map[string]interface{})
+	fmt.Println("Posted to the /admin/user/update Route")
+
+	err := r.ParseForm()
+
+	if err != nil {
+		fmt.Printf("\n\tError parsing member form")
+		helpers.ServerError(w, err)
+		return
+	}
+
+	memberId, _ := strconv.Atoi(r.Form.Get("id"))
+	accessLevel, _ := strconv.Atoi(r.Form.Get("accesslevel"))
+
+	memberForm := models.Member{
+		ID:          memberId,
+		FirstName:   r.Form.Get("fname"),
+		LastName:    r.Form.Get("lname"),
+		Email:       r.Form.Get("email"),
+		Phone:       r.Form.Get("phone"),
+		Password:    r.Form.Get("password"),
+		AccessLevel: accessLevel,
+	}
+
+	// form validation
+
+	form := forms.New(r.PostForm)
+	form.MinLength("fname", 2, r)
+	form.MinLength("lname", 2, r)
+	form.IsEmail("email")
+	form.Required("email", "fname", "lname", "accesslevel", "phone")
+
+	if !form.Valid() {
+		fmt.Printf("\n\tForm Error:\t%v\n\n", form.Errors)
+
+		data["member"] = memberForm
+
+		_ = render.Template(w, r, "user.page.tmpl", &models.TemplateData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
+
+	updatedMember, err := m.DB.UpdateUser(memberForm)
+
+	if err != nil {
+		fmt.Println("Error updating member:\t", err.Error())
+		http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
+	}
+
+	fmt.Println("Member updated:\t", updatedMember)
+
+	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
+}
+
+// @desc        Update user
+// @route       GET /admin/user/remove
+// @access      private
+
+func (m *Repository) RemoveUser(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
 }

@@ -133,6 +133,38 @@ func (m *postgresDBRepo) CreateUser(res models.Member) (map[string]string, error
 }
 
 // User stuff
+func (m *postgresDBRepo) UpdateUser(mem models.Member) (models.Member, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	query := `update members set first_name = $1, last_name = $2, email = $3, access_level = $4, phone = $5, updated_at = $6 where id = $7 returning id, first_name, last_name, email, phone, password, access_level, created_at, updated_at`
+
+	memberQueryRow, queryErr := m.DB.QueryContext(ctx, query,
+		mem.FirstName,
+		mem.LastName,
+		mem.Email,
+		mem.AccessLevel,
+		mem.Phone,
+		time.Now(),
+		mem.ID)
+
+	var u models.Member
+
+	if queryErr != nil {
+		fmt.Println("Update user query error:\t", queryErr.Error())
+		return u, queryErr
+	}
+
+	for memberQueryRow.Next() {
+		if err := memberQueryRow.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.Phone, &u.Password, &u.AccessLevel, &u.CreatedAt, &u.UpdatedAt); err != nil {
+			fmt.Printf("Update user scan error:\t%s\n", err.Error())
+			return u, err
+		}
+	}
+
+	return u, nil
+}
 
 func (m *postgresDBRepo) GetUserByID(id int) (models.Member, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -157,6 +189,7 @@ func (m *postgresDBRepo) GetUserByID(id int) (models.Member, error) {
 	)
 
 	if err != nil {
+		fmt.Println("GetUserByID query scan error:\t", err.Error())
 		return u, err
 	}
 

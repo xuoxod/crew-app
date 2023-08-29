@@ -46,8 +46,10 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Route("/admin", func(mux chi.Router) {
 		mux.Use(Auth)
 		mux.Get("/dashboard", handlers.Repo.AdminPage)
-		mux.Get("/users", handlers.Repo.AdminUsersPage)
+		mux.Get("/users", handlers.Repo.UsersPage)
 		mux.Get("/user/edit", handlers.Repo.UserPage)
+		mux.Post("/user/update", handlers.Repo.PostUserPage)
+		mux.Get("/user/remove", handlers.Repo.RemoveUser)
 	})
 
 	return mux

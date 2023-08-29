@@ -5,7 +5,7 @@ User
 
 {{define "content"}}
 <div class="row">
-    {{$user := index .Data "user"}}
+    {{$user := index .Data "member"}}
 
     <div class="col-12 grid-margin stretch-card">
         <div class="card">
@@ -13,7 +13,7 @@ User
                 <p class="card-title text-md-center text-xl-left">{{$user.FirstName}} {{$user.LastName}}</p>
                 <div class="w3-container w3-margin">
                     <div class="w3-container w3-row">
-                        <form action="/register" method="post" class="needs-validation" novalidate>
+                        <form action="/admin/user/update" method="post" class="needs-validation" novalidate>
 
                             <div class="mb-3">
                                 <label for="fname" class="form-label w3-left">
@@ -82,23 +82,9 @@ User
                                         {{end}}
                                     </strong>
                                 </label>
-                                <input type="text" class="form-control {{with .Form.Errors.Get "accesslevel"}}
+                                <input type="int" class="form-control {{with .Form.Errors.Get "accesslevel"}}
                                     is-invalid {{end}}" name="accesslevel" placeholder="Enter access level" autocomplete="off"
-                                    aria-label="Phone" aria-describedby="addon-wrapping" value="{{$user.AccessLevel}}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="password" class="form-label w3-left">
-                                    <strong>
-                                        Edit password
-                                        {{with .Form.Errors.Get "password"}}
-                                        <label for="" class="text-danger">{{.}}</label>
-                                        {{end}}
-                                    </strong>
-                                </label>
-                                <input type="password" class="form-control {{with .Form.Errors.Get "password"}} is-invalid
-                                    {{end}}" name="password" placeholder="Enter a password" autocomplete="off"
-                                    aria-label="Password" aria-describedby="addon-wrapping" value="{{$user.Password}}">
+                                    aria-label="Access Level" aria-describedby="addon-wrapping" value="{{$user.AccessLevel}}">
                             </div>
 
                             <div class="mb-3">
@@ -125,9 +111,19 @@ User
 
 
                             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                            <input type="hidden" name="id" value="{{$user.ID}}">
+                            <input type="hidden" name="password" value="{{$user.Password}}">
 
-                            <div class="input-group flex-nowrap w3-margin-top">
-                                <input class="w3-btn w3-blue w3-ripple w3-round-large" type="submit" value="Update">
+                            <div class="d-flex flex-wrap justify-content-between">
+                                <input class="w3-btn w3-green w3-ripple w3-round-large" type="submit" value="Update">
+
+                                <a href="/admin/user/remove" class="w3-btn w3-red w3-ripple w3-round-large">
+                                    Remove
+                                </a>
+
+                                <a href="/admin/users" class="w3-btn w3-blue w3-ripple w3-round-large">
+                                    Cancel
+                                </a>
                             </div>
                         </form>
                     </div>

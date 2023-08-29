@@ -655,12 +655,6 @@ func (m *Repository) ProfilePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if loggedin.AccessLevel != 1 {
-		m.App.ErrorLog.Println("Access Restricted")
-		m.App.Session.Put(r.Context(), "error", "Access Restricted")
-		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
-	}
-
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 

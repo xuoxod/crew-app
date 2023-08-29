@@ -47,6 +47,7 @@ func routes(app *config.AppConfig) http.Handler {
 		mux.Use(Auth)
 		mux.Get("/dashboard", handlers.Repo.AdminPage)
 		mux.Get("/users", handlers.Repo.AdminUsersPage)
+		mux.Get("/user/edit", handlers.Repo.UserPage)
 	})
 
 	return mux

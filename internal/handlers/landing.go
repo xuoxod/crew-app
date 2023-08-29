@@ -958,3 +958,69 @@ func (m *Repository) AdminUsersPage(w http.ResponseWriter, r *http.Request) {
 
 	_ = render.Template(w, r, "users.page.tmpl", &models.TemplateData{Data: data})
 }
+
+// @desc        AdminPage Dashboard Page
+// @route       GET /admin
+// @access      Private
+func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
+	var emptyMemberForm models.Registration
+	data := make(map[string]interface{})
+	data["member"] = emptyMemberForm
+
+	fmt.Println("Get UserPage Page")
+
+	paramUserId := r.URL.Query().Get("userid")
+	userId, _ := strconv.ParseInt(paramUserId, 0, 32)
+
+	fmt.Println("Query Info:\t", userId)
+
+	member, err := m.DB.GetUserByID(int(userId))
+
+	if err != nil {
+		fmt.Println("UserPage handler error:\t", err.Error())
+		return
+	}
+
+	fmt.Println("Got user member:\t", member)
+
+	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
+	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
+	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
+
+	if !loggedInOk {
+		log.Println("Cannot get loggedin session")
+		m.App.ErrorLog.Println("Can't get loggedin from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	if !profileOk {
+		log.Println("Cannot get profile session")
+		m.App.ErrorLog.Println("Can't get profile from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get profile from session")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	if !usersettingsOk {
+		log.Println("Cannot get usersettings from session")
+		m.App.ErrorLog.Println("Can't get usersettings from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get usersettings from session")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data["loggedin"] = loggedin
+	data["profile"] = profile
+	data["settings"] = usersettings
+	data["user"] = member
+
+	if loggedin.AccessLevel != 1 {
+		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+	}
+
+	_ = render.Template(w, r, "user.page.tmpl", &models.TemplateData{
+		Data: data,
+		Form: forms.New(nil)})
+}

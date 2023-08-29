@@ -139,7 +139,7 @@ func (m *postgresDBRepo) GetUserByID(id int) (models.Member, error) {
 
 	defer cancel()
 
-	query := `select id, first_name, last_name, email, phone, password, access_level, created_at, updated_at, craft_id from users where id = $1`
+	query := `select id, first_name, last_name, email, phone, password, access_level, created_at, updated_at from members where id = $1`
 
 	row := m.DB.QueryRowContext(ctx, query, id)
 
@@ -151,6 +151,7 @@ func (m *postgresDBRepo) GetUserByID(id int) (models.Member, error) {
 		&u.Email,
 		&u.Phone,
 		&u.Password,
+		&u.AccessLevel,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)

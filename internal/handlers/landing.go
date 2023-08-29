@@ -885,8 +885,6 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 		AllUsers: users,
 	}
 
-	fmt.Println("All Users:\t", allUsers)
-
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 	data["settings"] = usersettings

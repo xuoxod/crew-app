@@ -1082,10 +1082,9 @@ func (m *Repository) PostUserPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
 }
 
-// @desc        Update user
+// @desc        Remove user
 // @route       GET /admin/user/remove
 // @access      private
-
 func (m *Repository) RemoveUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
 }

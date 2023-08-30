@@ -959,7 +959,7 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // @desc        AdminPage Dashboard Page
-// @route       GET /admin
+// @route       GET /admin/user
 // @access      Private
 func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 	var emptyMemberForm models.Registration
@@ -1004,7 +1004,7 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Get UserPage Page")
 
-	paramUserId := r.URL.Query().Get("userid")
+	paramUserId := r.URL.Query().Get("code")
 	num, _ := strconv.ParseInt(paramUserId, 0, 32)
 	var userId int = int(num)
 

@@ -54,3 +54,11 @@ func (m *testDBRepo) UpdateUser(mem models.Member) (models.Member, error) {
 
 	return u, nil
 }
+func (m *testDBRepo) RemoveUser(id int) error {
+
+	return nil
+}
+func (m *testDBRepo) AddUser(models.Member) error {
+
+	return nil
+}

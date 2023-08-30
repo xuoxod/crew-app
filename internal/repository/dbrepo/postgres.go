@@ -499,3 +499,13 @@ func (m *postgresDBRepo) UpdateUserSettings(s models.UserSettings) map[string]st
 
 	return results
 }
+
+func (m *postgresDBRepo) RemoveUser(id int) error {
+
+	return nil
+}
+
+func (m *postgresDBRepo) AddUser(models.Member) error {
+
+	return nil
+}

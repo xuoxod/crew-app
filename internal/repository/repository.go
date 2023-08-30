@@ -11,4 +11,6 @@ type DatabaseRepo interface {
 	UpdateUserProfile(u models.Member, p models.Profile) map[string]string
 	AuthenticateUser(email, testPassword string) map[string]string
 	UpdateUserSettings(u models.UserSettings) map[string]string
+	RemoveUser(id int) error
+	AddUser(models.Member) error
 }

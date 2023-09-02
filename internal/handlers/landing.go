@@ -1041,6 +1041,7 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 	data["settings"] = usersettings
+	data["users"] = allUsers
 
 	fmt.Println("Get UserPage Page")
 

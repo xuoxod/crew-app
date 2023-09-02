@@ -387,21 +387,26 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	users := m.DB.AllUsers()
-	strErr := users["err"][0]
 
+	strErr := users["err"][0]
 	if strErr != "" {
-		fmt.Println(strErr)
+		fmt.Println("Post login DB error getting all users:\t", strErr)
 		return
 	}
+
+	delete(users, "err")
 
 	allUsers := models.Users{
 		AllUsers: users,
 	}
 
+	fmt.Print("All Users:\t", users)
+
 	m.App.Session.Put(r.Context(), "user_id", member)
 	m.App.Session.Put(r.Context(), "loggedin", member)
 	m.App.Session.Put(r.Context(), "user_profile", userProfile)
 	m.App.Session.Put(r.Context(), "user_settings", userSettings)
+	m.App.Session.Put(r.Context(), "allusers", allUsers)
 
 	if accessLevel == 1 {
 		// http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
@@ -872,12 +877,13 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
+	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "alluser").(models.Users)
 
 	if !loggedInOk {
 		log.Println("Cannot get loggedin session")
 		m.App.ErrorLog.Println("Can't get loggedin from the session")
 		m.App.Session.Put(r.Context(), "error", "Can't get loggedin from session")
-		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -885,7 +891,7 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 		log.Println("Cannot get profile session")
 		m.App.ErrorLog.Println("Can't get profile from the session")
 		m.App.Session.Put(r.Context(), "error", "Can't get profile from session")
-		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -893,34 +899,33 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 		log.Println("Cannot get usersettings session")
 		m.App.ErrorLog.Println("Can't get usersettings from the session")
 		m.App.Session.Put(r.Context(), "error", "Can't get usersettings from session")
-		http.Redirect(w, r, "/user/dashboard", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
 
-	users := m.DB.AllUsers()
-
-	if users["err"][0] != "" {
-		fmt.Println(users["err"])
+	if !allUsersOk {
+		log.Println("Cannot get alluser session")
+		m.App.ErrorLog.Println("Can't get alluser from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get alluser from session")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
-
-	delete(users, "err")
-
-	allUsers := models.Users{
-		AllUsers: users,
-	}
-
-	data["loggedin"] = loggedin
-	data["profile"] = profile
-	data["settings"] = usersettings
-	data["users"] = users
 
 	if loggedin.AccessLevel != 1 {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+		// http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+		data["loggedin"] = loggedin
+		data["profile"] = profile
+		data["settings"] = usersettings
+		_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
+	} else {
+		data["loggedin"] = loggedin
+		data["profile"] = profile
+		data["settings"] = usersettings
+		data["users"] = allUsers.AllUsers
+		m.App.Session.Put(r.Context(), "allusers", allUsers.AllUsers)
+		_ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
 	}
 
-	m.App.Session.Put(r.Context(), "allusers", allUsers)
-	_ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
 }
 
 // @desc        AdminPage Dashboard Page
@@ -934,6 +939,7 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
+	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "alluser").(models.Users)
 
 	if !loggedInOk {
 		log.Println("Cannot get loggedin session")
@@ -959,26 +965,28 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allUsers := m.DB.AllUsers()
-
-	err := allUsers["err"][0]
-	if err != "" {
-		fmt.Println("UsersPage error getting all users:\t", err)
+	if !allUsersOk {
+		log.Println("Cannot get alluser session")
+		m.App.ErrorLog.Println("Can't get alluser from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get alluser from session")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
 		return
 	}
 
-	delete(allUsers, "err")
-
-	data["loggedin"] = loggedin
-	data["profile"] = profile
-	data["settings"] = usersettings
-	data["users"] = allUsers
-
 	if loggedin.AccessLevel != 1 {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+		// http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+		data["loggedin"] = loggedin
+		data["profile"] = profile
+		data["settings"] = usersettings
+		_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
+	} else {
+		data["loggedin"] = loggedin
+		data["profile"] = profile
+		data["settings"] = usersettings
+		data["users"] = allUsers.AllUsers
+		m.App.Session.Put(r.Context(), "allusers", allUsers)
+		_ = render.Template(w, r, "users.page.tmpl", &models.TemplateData{Data: data})
 	}
-
-	_ = render.Template(w, r, "users.page.tmpl", &models.TemplateData{Data: data})
 }
 
 // @desc        AdminPage Dashboard Page
@@ -992,6 +1000,7 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
+	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "alluser").(models.Users)
 
 	if !loggedInOk {
 		log.Println("Cannot get loggedin session")
@@ -1017,9 +1026,17 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if loggedin.AccessLevel != 1 {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+	if !allUsersOk {
+		log.Println("Cannot get alluser session")
+		m.App.ErrorLog.Println("Can't get alluser from the session")
+		m.App.Session.Put(r.Context(), "error", "Can't get alluser from session")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
 	}
+
+	/* if loggedin.AccessLevel != 1 {
+		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+	} */
 
 	data["loggedin"] = loggedin
 	data["profile"] = profile

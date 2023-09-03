@@ -914,6 +914,8 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
 	}
 
+	fmt.Println("All users:\t", allUsers.AllUsers)
+
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 	data["settings"] = usersettings

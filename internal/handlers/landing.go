@@ -912,17 +912,13 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 
 	if loggedin.AccessLevel != 1 {
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-		// data["loggedin"] = loggedin
-		// data["profile"] = profile
-		// data["settings"] = usersettings
-		// _ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
-	} else {
-		data["loggedin"] = loggedin
-		data["profile"] = profile
-		data["settings"] = usersettings
-		data["users"] = allUsers.AllUsers
-		_ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
 	}
+
+	data["loggedin"] = loggedin
+	data["profile"] = profile
+	data["settings"] = usersettings
+	data["users"] = allUsers.AllUsers
+	_ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
 
 }
 

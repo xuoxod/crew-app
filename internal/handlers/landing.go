@@ -399,29 +399,17 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 		AllUsers: users,
 	}
 
-	fmt.Print("All Users:\t", users)
-
 	m.App.Session.Put(r.Context(), "user_id", member)
 	m.App.Session.Put(r.Context(), "loggedin", member)
 	m.App.Session.Put(r.Context(), "user_profile", userProfile)
 	m.App.Session.Put(r.Context(), "user_settings", userSettings)
 	m.App.Session.Put(r.Context(), "allusers", allUsers)
 
-	if accessLevel == 1 {
-		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
-		// data["loggedin"] = member
-		// data["profile"] = userProfile
-		// data["settings"] = userSettings
-		// data["users"] = allUsers.AllUsers
-		// _ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
-	} else {
+	if results["accessLevel"] != "1" {
 		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-
-		// data["loggedin"] = member
-		// data["profile"] = userProfile
-		// data["settings"] = userSettings
-		// _ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
 	}
+
+	http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
 
 }
 

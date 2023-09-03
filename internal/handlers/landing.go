@@ -199,7 +199,6 @@ func (m *Repository) RegistrationSummary(w http.ResponseWriter, r *http.Request)
 // @access      Public
 func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.RenewToken(r.Context())
-	data := make(map[string]interface{})
 
 	err := r.ParseForm()
 
@@ -409,19 +408,19 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "allusers", allUsers)
 
 	if accessLevel == 1 {
-		// http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
-		data["loggedin"] = member
-		data["profile"] = userProfile
-		data["settings"] = userSettings
-		data["users"] = allUsers.AllUsers
-		_ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
+		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
+		// data["loggedin"] = member
+		// data["profile"] = userProfile
+		// data["settings"] = userSettings
+		// data["users"] = allUsers.AllUsers
+		// _ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
 	} else {
-		// http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
 
-		data["loggedin"] = member
-		data["profile"] = userProfile
-		data["settings"] = userSettings
-		_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
+		// data["loggedin"] = member
+		// data["profile"] = userProfile
+		// data["settings"] = userSettings
+		// _ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
 	}
 
 }
@@ -877,7 +876,7 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
-	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "alluser").(models.Users)
+	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "allusers").(models.Users)
 
 	if !loggedInOk {
 		log.Println("Cannot get loggedin session")
@@ -912,17 +911,16 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if loggedin.AccessLevel != 1 {
-		// http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-		data["loggedin"] = loggedin
-		data["profile"] = profile
-		data["settings"] = usersettings
-		_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
+		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+		// data["loggedin"] = loggedin
+		// data["profile"] = profile
+		// data["settings"] = usersettings
+		// _ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
 	} else {
 		data["loggedin"] = loggedin
 		data["profile"] = profile
 		data["settings"] = usersettings
 		data["users"] = allUsers.AllUsers
-		m.App.Session.Put(r.Context(), "allusers", allUsers.AllUsers)
 		_ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
 	}
 
@@ -939,7 +937,7 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
-	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "alluser").(models.Users)
+	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "allusers").(models.Users)
 
 	if !loggedInOk {
 		log.Println("Cannot get loggedin session")
@@ -974,11 +972,7 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if loggedin.AccessLevel != 1 {
-		// http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-		data["loggedin"] = loggedin
-		data["profile"] = profile
-		data["settings"] = usersettings
-		_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
+		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
 	} else {
 		data["loggedin"] = loggedin
 		data["profile"] = profile
@@ -1000,7 +994,7 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
 	usersettings, usersettingsOk := m.App.Session.Get(r.Context(), "user_settings").(models.UserSettings)
-	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "alluser").(models.Users)
+	allUsers, allUsersOk := m.App.Session.Get(r.Context(), "allusers").(models.Users)
 
 	if !loggedInOk {
 		log.Println("Cannot get loggedin session")
@@ -1034,15 +1028,6 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/* if loggedin.AccessLevel != 1 {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-	} */
-
-	data["loggedin"] = loggedin
-	data["profile"] = profile
-	data["settings"] = usersettings
-	data["users"] = allUsers
-
 	fmt.Println("Get UserPage Page")
 
 	paramUserId := r.URL.Query().Get("code")
@@ -1056,6 +1041,16 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data["member"] = member
+
+	if loggedin.AccessLevel != 1 {
+		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+	}
+
+	data["loggedin"] = loggedin
+	data["profile"] = profile
+	data["settings"] = usersettings
+	data["users"] = allUsers.AllUsers
 	data["member"] = member
 
 	_ = render.Template(w, r, "user.page.tmpl", &models.TemplateData{

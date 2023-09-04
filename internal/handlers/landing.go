@@ -908,7 +908,7 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 	data["profile"] = profile
 	data["settings"] = usersettings
 	data["users"] = allUsers.AllUsers
-	_ = render.Template(w, r, "lord.page.tmpl", &models.TemplateData{Data: data})
+	_ = render.Template(w, r, "admin.page.tmpl", &models.TemplateData{Data: data})
 
 }
 

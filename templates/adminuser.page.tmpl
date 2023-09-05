@@ -5,7 +5,10 @@ admin
 
 {{define "content"}}
 <div class="row">
-
+{{$user := index .Data "loggedin"}}
+{{$profile := index .Data "profile"}}
+{{$settings := index .Data "settings"}}
+{{$users := index .Data "users"}}
 
     <div class="col-md-3 grid-margin stretch-card">
         <div class="card">
@@ -13,7 +16,7 @@ admin
                 <p class="card-title text-md-center text-xl-left">Members</p>
                 <div
                     class="d-flex flex-wrap justify-content-between justify-content-md-center justify-content-xl-between align-items-center">
-                    <h3 class="mb-0 mb-md-2 mb-xl-0 order-md-1 order-xl-0">44</h3>
+                    <h3 class="mb-0 mb-md-2 mb-xl-0 order-md-1 order-xl-0">{{len $users}}</h3>
                     <a class="link" style="text-decoration:none;" href="/admin/users">
                         <i class="ti-user icon-md text-muted mb-0 mb-md-3 mb-xl-0"></i>
                     </a>

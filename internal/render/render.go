@@ -31,6 +31,10 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 		td.IsAuthenticated = 1
 	}
 
+	if app.Session.Exists(r.Context(), "admin_id") {
+		td.IsAdmin = 1
+	}
+
 	return td
 }
 

@@ -31,3 +31,10 @@ func IsAuthenticated(r *http.Request) bool {
 
 	return exists
 }
+
+func IsAdmin(r *http.Request) bool {
+	isAdmin := app.Session.Exists(r.Context(), "admin_id")
+	isAuthed := app.Session.Exists(r.Context(), "user_id")
+
+	return isAdmin && isAuthed
+}

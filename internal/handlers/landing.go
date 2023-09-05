@@ -405,12 +405,11 @@ func (m *Repository) LoginPage(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "user_settings", userSettings)
 	m.App.Session.Put(r.Context(), "allusers", allUsers)
 
-	if results["accessLevel"] != "1" {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+	if member.AccessLevel == 1 {
+		m.App.Session.Put(r.Context(), "admin_id", member.AccessLevel)
 	}
 
-	http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
-
+	http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
 }
 
 // @desc        Signout user
@@ -484,11 +483,8 @@ func (m *Repository) Dashboard(w http.ResponseWriter, r *http.Request) {
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 
-	if loggedin.AccessLevel == 1 {
-		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
-	} else {
-		_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
-	}
+	_ = render.Template(w, r, "dashboard.page.tmpl", &models.TemplateData{Data: data})
+
 }
 
 // @desc        Settings Page
@@ -898,10 +894,6 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if loggedin.AccessLevel != 1 {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-	}
-
 	fmt.Println("All users:\t", allUsers.AllUsers)
 
 	data["loggedin"] = loggedin
@@ -957,16 +949,13 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if loggedin.AccessLevel != 1 {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-	} else {
-		data["loggedin"] = loggedin
-		data["profile"] = profile
-		data["settings"] = usersettings
-		data["users"] = allUsers.AllUsers
-		m.App.Session.Put(r.Context(), "allusers", allUsers)
-		_ = render.Template(w, r, "users.page.tmpl", &models.TemplateData{Data: data})
-	}
+	data["loggedin"] = loggedin
+	data["profile"] = profile
+	data["settings"] = usersettings
+	data["users"] = allUsers.AllUsers
+	m.App.Session.Put(r.Context(), "allusers", allUsers)
+	_ = render.Template(w, r, "users.page.tmpl", &models.TemplateData{Data: data})
+
 }
 
 // @desc        AdminPage Dashboard Page
@@ -1028,10 +1017,6 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["member"] = member
-
-	if loggedin.AccessLevel != 1 {
-		http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
-	}
 
 	data["loggedin"] = loggedin
 	data["profile"] = profile

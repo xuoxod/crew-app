@@ -62,3 +62,15 @@ func Unauth(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func Admin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !helpers.IsAdmin(r) {
+			session.Put(r.Context(), "warning", "Access Restricted")
+			http.Redirect(w, r, "/user/dashboard", http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}

@@ -910,7 +910,7 @@ func (m *Repository) AdminPage(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 
-	fmt.Println("Get Admin Page")
+	fmt.Println("Get Users Page")
 
 	loggedin, loggedInOk := m.App.Session.Get(r.Context(), "loggedin").(models.Member)
 	profile, profileOk := m.App.Session.Get(r.Context(), "user_profile").(models.Profile)
@@ -952,7 +952,7 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 	data["loggedin"] = loggedin
 	data["profile"] = profile
 	data["settings"] = usersettings
-	data["users"] = allUsers.AllUsers
+	data["allusers"] = allUsers.AllUsers
 	m.App.Session.Put(r.Context(), "allusers", allUsers)
 	_ = render.Template(w, r, "users.page.tmpl", &models.TemplateData{Data: data})
 

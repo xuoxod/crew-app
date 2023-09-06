@@ -953,7 +953,6 @@ func (m *Repository) UsersPage(w http.ResponseWriter, r *http.Request) {
 	data["profile"] = profile
 	data["settings"] = usersettings
 	data["allusers"] = allUsers.AllUsers
-	m.App.Session.Put(r.Context(), "allusers", allUsers)
 	_ = render.Template(w, r, "users.page.tmpl", &models.TemplateData{Data: data})
 
 }

@@ -1,10 +1,13 @@
-{{template "god" .}}
+{{template "admin" .}}
 {{ define "title"}}
 Users
 {{end}}
 
 {{define "content"}}
 <div class="row">
+    {{$user := index .Data "loggedin"}}
+    {{$profile := index .Data "profile"}}
+    {{$settings := index .Data "settings"}}
     {{$users := index .Data "allusers"}}
 
     <div class="col-12 grid-margin stretch-card">
@@ -34,8 +37,7 @@ Users
                                                     ID
                                                 </label>
                                             </div>
-                                            <input type="text" class="form-control user-id" name="userid"
-                                                aria-label="Text input with checkbox" readonly value="{{index $v 0}}">
+                                            <input type="text" class="form-control" aria-label="Text input with checkbox" readonly value="{{index $v 0}}">
                                         </div>
 
                                         <div class="input-group input-group-lg mb-4">
@@ -44,8 +46,7 @@ Users
                                                     First Name
                                                 </label>
                                             </div>
-                                            <input type="text" class="form-control"
-                                                aria-label="Text input with checkbox" readonly value="{{index $v 1}}">
+                                            <input type="text" class="form-control" aria-label="Text input with checkbox" readonly value="{{index $v 1}}">
                                         </div>
 
                                         <div class="input-group input-group-lg mb-4">
@@ -54,8 +55,7 @@ Users
                                                     Last Name
                                                 </label>
                                             </div>
-                                            <input type="text" class="form-control"
-                                                aria-label="Text input with checkbox" readonly value="{{index $v 2}}">
+                                            <input type="text" class="form-control" aria-label="Text input with checkbox" readonly value="{{index $v 2}}">
                                         </div>
 
                                         <div class="input-group input-group-lg mb-4">
@@ -64,8 +64,7 @@ Users
                                                     Email
                                                 </label>
                                             </div>
-                                            <input type="text" class="form-control"
-                                                aria-label="Text input with checkbox" readonly value="{{index $v 3}}">
+                                            <input type="text" class="form-control" aria-label="Text input with checkbox" readonly value="{{index $v 3}}">
                                         </div>
 
                                         <div class="input-group input-group-lg mb-4">
@@ -74,8 +73,7 @@ Users
                                                     Phone
                                                 </label>
                                             </div>
-                                            <input type="text" class="form-control"
-                                                aria-label="Text input with checkbox" readonly value="{{index $v 4}}">
+                                            <input type="text" class="form-control" aria-label="Text input with checkbox" readonly value="{{index $v 4}}">
                                         </div>
 
                                         <div class="input-group input-group-lg mb-4">
@@ -84,8 +82,7 @@ Users
                                                     Access Level
                                                 </label>
                                             </div>
-                                            <input type="text" class="form-control"
-                                                aria-label="Text input with checkbox" readonly value="{{index $v 5}}">
+                                            <input type="text" class="form-control" aria-label="Text input with checkbox" readonly value="{{index $v 5}}">
                                         </div>
 
                                         <div class="d-flex flex-wrap justify-content-between">

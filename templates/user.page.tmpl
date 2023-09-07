@@ -6,10 +6,6 @@ User
 {{define "content"}}
 <div class="row">
     {{$member := index .Data "member"}}
-    {{$user := index .Data "loggedin"}}
-    {{$profile := index .Data "profile"}}
-    {{$settings := index .Data "settings"}}
-    {{$users := index .Data "allusers"}}
 
     <div class="col-12 grid-margin stretch-card">
         <div class="card">
@@ -115,8 +111,8 @@ User
 
 
                             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                            <input type="hidden" name="id" value="{{$user.ID}}">
-                            <input type="hidden" name="password" value="{{$user.Password}}">
+                            <input type="hidden" name="id" value="{{$member.ID}}">
+                            <input type="hidden" name="password" value="{{$member.Password}}">
 
                             <div class="d-flex flex-wrap justify-content-between">
                                 <input class="w3-btn w3-green w3-ripple w3-round-large" type="submit" value="Update">

@@ -1002,7 +1002,7 @@ func (m *Repository) UserPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Get UserPage Page")
+	fmt.Println("Get User Page")
 
 	paramUserId := r.URL.Query().Get("code")
 	num, _ := strconv.ParseInt(paramUserId, 0, 32)

@@ -1,16 +1,20 @@
-{{template "god" .}}
+{{template "admin" .}}
 {{ define "title"}}
 User
 {{end}}
 
 {{define "content"}}
 <div class="row">
-    {{$user := index .Data "member"}}
+    {{$member := index .Data "member"}}
+    {{$user := index .Data "loggedin"}}
+    {{$profile := index .Data "profile"}}
+    {{$settings := index .Data "settings"}}
+    {{$users := index .Data "allusers"}}
 
     <div class="col-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <p class="card-title text-md-center text-xl-left">{{$user.FirstName}} {{$user.LastName}}</p>
+                <p class="card-title text-md-center text-xl-left">{{$member.FirstName}} {{$member.LastName}}</p>
                 <div class="w3-container w3-margin">
                     <div class="w3-container w3-row">
                         <form action="/admin/user/update" method="post" class="needs-validation" novalidate>
@@ -28,7 +32,7 @@ User
                                 <input type="text" class="form-control {{with .Form.Errors.Get "fname"}} is-invalid
                                     {{end}}" name="fname" placeholder="Enter first name" autocomplete="off"
                                     aria-label="First Name" aria-describedby="addon-wrapping"
-                                    value="{{$user.FirstName}}">
+                                    value="{{$member.FirstName}}">
                             </div>
 
                             <div class="mb-3">
@@ -42,7 +46,7 @@ User
                                 </label>
                                 <input type="text" class="form-control {{with .Form.Errors.Get "lname"}} is-invalid
                                     {{end}}" name="lname" placeholder="Enter last name" autocomplete="off"
-                                    aria-label="Last Name" aria-describedby="addon-wrapping" value="{{$user.LastName}}">
+                                    aria-label="Last Name" aria-describedby="addon-wrapping" value="{{$member.LastName}}">
                             </div>
 
                             <div class="mb-3">
@@ -56,7 +60,7 @@ User
                                 </label>
                                 <input type="text" class="form-control {{with .Form.Errors.Get "email"}} is-invalid
                                     {{end}}" name="email" placeholder="Enter email address" autocomplete="off"
-                                    aria-label="Email" aria-describedby="addon-wrapping" value="{{$user.Email}}">
+                                    aria-label="Email" aria-describedby="addon-wrapping" value="{{$member.Email}}">
                             </div>
 
                             <div class="mb-3">
@@ -70,7 +74,7 @@ User
                                 </label>
                                 <input type="text" class="form-control {{with .Form.Errors.Get "phone"}} is-invalid
                                     {{end}}" name="phone" placeholder="Enter phone number" autocomplete="off"
-                                    aria-label="Phone" aria-describedby="addon-wrapping" value="{{$user.Phone}}">
+                                    aria-label="Phone" aria-describedby="addon-wrapping" value="{{$member.Phone}}">
                             </div>
 
                             <div class="mb-3">
@@ -84,7 +88,7 @@ User
                                 </label>
                                 <input type="int" class="form-control {{with .Form.Errors.Get "accesslevel"}}
                                     is-invalid {{end}}" name="accesslevel" placeholder="Enter access level" autocomplete="off"
-                                    aria-label="Access Level" aria-describedby="addon-wrapping" value="{{$user.AccessLevel}}">
+                                    aria-label="Access Level" aria-describedby="addon-wrapping" value="{{$member.AccessLevel}}">
                             </div>
 
                             <div class="mb-3">
@@ -95,7 +99,7 @@ User
                                 </label>
                                 <input type="text" class="form-control" readonly name="createdat" autocomplete="off"
                                     aria-label="Creation Date" aria-describedby="addon-wrapping"
-                                    value="{{$user.CreatedAt}}">
+                                    value="{{$member.CreatedAt}}">
                             </div>
 
                             <div class="mb-3">
@@ -106,7 +110,7 @@ User
                                 </label>
                                 <input type="text" class="form-control" readonly name="updatedat" autocomplete="off"
                                     aria-label="Update Date" aria-describedby="addon-wrapping"
-                                    value="{{$user.UpdatedAt}}">
+                                    value="{{$member.UpdatedAt}}">
                             </div>
 
 

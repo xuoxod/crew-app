@@ -1085,6 +1085,24 @@ func (m *Repository) PostUserPage(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Member updated:\t", updatedMember)
 
+	m.App.Session.Remove(r.Context(), "allusers")
+
+	users := m.DB.AllUsers()
+
+	strErr := users["err"][0]
+	if strErr != "" {
+		fmt.Println("Post login DB error getting all users:\t", strErr)
+		return
+	}
+
+	delete(users, "err")
+
+	allUsers := models.Users{
+		AllUsers: users,
+	}
+
+	m.App.Session.Put(r.Context(), "allusers", allUsers)
+
 	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
 }
 

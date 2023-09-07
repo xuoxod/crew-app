@@ -17,9 +17,9 @@ func (m *postgresDBRepo) AllUsers() map[string][]string {
 
 	defer cancel()
 
-	query := `select id, first_name, last_name, email, phone, access_level, password from members where access_level = $1`
+	query := `select id, first_name, last_name, email, phone, access_level, password from members where access_level = $1 or access_level = $2`
 
-	rows, err := m.DB.QueryContext(ctx, query, 3)
+	rows, err := m.DB.QueryContext(ctx, query, 3, 2)
 
 	if err != nil {
 		results["err"] = []string{err.Error()}
